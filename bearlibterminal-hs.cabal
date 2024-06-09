@@ -1,0 +1,61 @@
+cabal-version: 3.6
+name:          bearlibterminal-hs
+version:       0.0.1.0
+synopsis:      Low-level Haskell bindings to the bearlibterminal graphics library.
+description:   Low-level Haskell bindings to the bearlibterminal graphics library.
+homepage:      https://github.com/PPKFS/bearlibterminal-hs
+bug-reports:   https://github.com/PPKFS/bearlibterminal-hs/issues
+license:       MIT
+author:        Avery
+maintainer:    Avery <ppkfs@outlook.com>
+copyright:     2024 Avery
+category:      Game Development
+build-type:    Simple
+tested-with:   GHC == 9.8.2
+
+source-repository head
+  type:     git
+  location: https://github.com/PPKFS/bearlibterminal-hs.git
+
+common common-options
+  build-depends:
+    base >= 4.17.2 && < 5
+    , text
+    , bytestring
+    , mtl
+    , unliftio
+  ghc-options:
+    -Wall -Wcompat -Widentities -Wredundant-constraints
+    -Wno-unused-packages -Wno-deprecations -fhide-source-paths
+    -Wno-unused-top-binds -Wmissing-deriving-strategies -O2
+
+  default-language: GHC2021
+  default-extensions:
+    DerivingStrategies
+    OverloadedStrings
+    MultiWayIf
+    BlockArguments
+
+library
+  import: common-options
+  hs-source-dirs:  src
+  exposed-modules:
+    BearMonadTerminal
+    BearLibTerminal.Raw
+  extra-libraries: stdc++ BearLibTerminal
+  include-dirs:
+    cbits
+
+executable omni
+  import:          common-options
+  hs-source-dirs:  omni
+  main-is: Main.hs
+  other-modules:
+    Omni.Speed
+  build-depends:
+    bearlibterminal-hs,
+    random,
+    word8,
+    bytestring,
+    vector,
+    time
