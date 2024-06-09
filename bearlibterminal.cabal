@@ -1,5 +1,5 @@
 cabal-version: 3.6
-name:          bearlibterminal-hs
+name:          bearlibterminal
 version:       0.0.1.0
 synopsis:      Low-level Haskell bindings to the bearlibterminal graphics library.
 description:   Low-level Haskell bindings to the bearlibterminal graphics library.
@@ -19,11 +19,12 @@ source-repository head
 
 common common-options
   build-depends:
-    base >= 4.17.2 && < 5
-    , text
-    , bytestring
-    , mtl
-    , unliftio
+      base >= 4.17.2 && < 5
+    , text >= 2.1.1 && < 2.2
+    , bytestring >= 0.12.1 && < 0.13
+    , mtl >= 2.3.1 && < 2.4
+    , unliftio >= 0.2.25 && < 0.3
+
   ghc-options:
     -Wall -Wcompat -Widentities -Wredundant-constraints
     -Wno-unused-packages -Wno-deprecations -fhide-source-paths
@@ -47,15 +48,14 @@ library
     cbits
 
 executable omni
-  import:          common-options
+  import: common-options
   hs-source-dirs:  omni
   main-is: Main.hs
   other-modules:
     Omni.Speed
   build-depends:
-    bearlibterminal-hs,
-    random,
-    word8,
-    bytestring,
-    vector,
-    time
+    bearlibterminal
+    , time >= 1.12.2 && < 1.13
+    , random >= 1.2.1 && < 1.3
+    , vector >= 0.13.1 && < 0.14
+    , word8 >= 0.1.3 && < 0.2

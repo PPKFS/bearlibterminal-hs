@@ -1,6 +1,6 @@
 module Main where
 
-import BearLibTerminalExtras
+import BearLibTerminal
 import BearLibTerminal.Raw
 import Control.Monad
 import Control.Exception
@@ -69,6 +69,7 @@ alignRight = 2
 
 resetTerminal :: IO ()
 resetTerminal = do
+  -- TODO: I moved all the actual helper stuff to roguefunctor..
   -- todo: font:default, input filter to keyboard
-  void $ terminalSet defaultWindowOptions { title = Just "Omni: menu" }
+  --void $ terminalSetText "" defaultWindowOptions { title = Just "Omni: menu" }
   terminalColorNameText "white"

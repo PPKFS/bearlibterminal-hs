@@ -25,7 +25,7 @@ data Color a = Color !a !a !a
 shiftColor :: Int -> Color Word8
 shiftColor s =
   let (f :: Float) = fromIntegral (s `mod` 80) / 80.0
-      (Color r g b) = if
+      (Color r _g _b) = if
             | f < 0.33
                 -> Color (255 * ((0.33-f)/0.33)) (255 * ((f-0.0)/0.33)) 0
             | f < 0.66
@@ -83,7 +83,7 @@ runLoop (i, c) s s2 v = do
       -- terminal_color(color_from_another(100, shifted_b[(shift_f2+y-x)%80]));
       terminalPut x y 0x2588
       let (d :: Float) = abs $ 40.0 - fromIntegral (s `mod` 80)
-      terminalColorUInt (fromByteString $ B.pack [ min 255 (fromIntegral $ round ((128.0*d)/40.0)), 255, 255, 255 ])
+      terminalColorUInt (fromByteString $ B.pack [ min 255 (fromIntegral @Int $ round ((128.0*d)/40.0)), 255, 255, 255 ])
       -- int d = (int)std::fabs(40-(int)((shift_f)%80));
                         -- terminal_color(color_from_argb((int)(d/40.0f*128.0f), 255, 255, 255));
       terminalPut x y (fromEnum '0'))
