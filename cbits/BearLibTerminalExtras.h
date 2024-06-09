@@ -1,5 +1,5 @@
-#ifndef BEARMONADTERMINAL_H
-#define BEARMONADTERMINAL_H
+#ifndef BEARLIBTERMINALEXTRAS_H
+#define BEARLIBTERMINALEXTRAS_H
 
 #include "BearLibTerminal.h"
 #include <string.h>

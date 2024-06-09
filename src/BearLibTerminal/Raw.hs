@@ -64,7 +64,7 @@ terminalSetText :: MonadIO m => Text -> m Bool
 terminalSetText = textToCString terminalSetCString
 
 foreign import capi safe "BearLibTerminal.h terminal_color" c_terminal_color_uint :: CUInt -> IO ()
-foreign import capi safe "BearMonadTerminal.h terminal_color_from_name" c_terminal_color_from_name :: CString -> IO ()
+foreign import capi safe "BearLibTerminalExtras.h terminal_color_from_name" c_terminal_color_from_name :: CString -> IO ()
 
 terminalColorUInt :: MonadIO m => CUInt -> m ()
 terminalColorUInt = liftIO . c_terminal_color_uint
@@ -79,7 +79,7 @@ terminalColorNameBS :: MonadIO m => ByteString -> m ()
 terminalColorNameBS = bsToCString terminalColorNameCString
 
 foreign import capi safe "BearLibTerminal.h terminal_bkcolor" c_terminal_bkcolor_uint :: CUInt -> IO ()
-foreign import capi safe "BearMonadTerminal.h terminal_bkcolor_from_name" c_terminal_bkcolor_from_name :: CString -> IO ()
+foreign import capi safe "BearLibTerminalExtras.h terminal_bkcolor_from_name" c_terminal_bkcolor_from_name :: CString -> IO ()
 
 terminalBkColorUInt :: MonadIO m => CUInt -> m ()
 terminalBkColorUInt = liftIO . c_terminal_bkcolor_uint
@@ -121,23 +121,10 @@ foreign import capi safe "BearLibTerminal.h terminal_clear_area" c_terminal_clea
 terminalClearArea :: MonadIO m => Int -> Int -> Int -> Int -> m ()
 terminalClearArea x y w h = liftIO (c_terminal_clear_area (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h))
 
-data Rectangle a = Rectangle
-  { x :: a
-  , y :: a
-  , width :: a
-  , height :: a
-  }
-
-terminalClearRect :: MonadIO m => Rectangle Int -> m ()
-terminalClearRect Rectangle{..} = terminalClearArea x y width height
-
 foreign import capi safe "BearLibTerminal.h terminal_crop" c_terminal_crop :: CInt -> CInt -> CInt -> CInt -> IO ()
 
 terminalCrop :: MonadIO m => Int -> Int -> Int -> Int -> m ()
 terminalCrop x y w h = liftIO (c_terminal_crop (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h))
-
-terminalCropRect :: MonadIO m => Rectangle Int -> m ()
-terminalCropRect Rectangle{..} = terminalCrop x y width height
 
 foreign import capi safe "BearLibTerminal.h terminal_refresh" c_terminal_refresh :: IO ()
 
@@ -174,7 +161,7 @@ terminalPutExt x y dx dy code mbColors = liftIO $ colorsToArr $ c_terminal_put_e
       Nothing -> f nullPtr
       Just (tl, bl, br, tr) -> withArray (map fromIntegral [tl, bl, br, tr]) f
 
-foreign import capi safe "BearMonadTerminal.h terminal_print_ptr" c_terminal_print_ptr :: CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
+foreign import capi safe "BearLibTerminalExtras.h terminal_print_ptr" c_terminal_print_ptr :: CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
 
 terminalPrintCString :: MonadIO m => Int -> Int -> CString -> m Dimensions
 terminalPrintCString x y c = liftIO $ alloca (\dim -> c_terminal_print_ptr (fromIntegral x) (fromIntegral y) c dim >> peek dim)
@@ -185,25 +172,16 @@ terminalPrintBS x y = bsToCString (terminalPrintCString x y)
 terminalPrintText :: MonadIO m => Int -> Int -> Text -> m Dimensions
 terminalPrintText x y = textToCString (terminalPrintCString x y)
 
-foreign import capi safe "BearMonadTerminal.h terminal_print_ext_ptr" c_terminal_print_ext_ptr :: CInt -> CInt -> CInt -> CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
+foreign import capi safe "BearLibTerminalExtras.h terminal_print_ext_ptr" c_terminal_print_ext_ptr :: CInt -> CInt -> CInt -> CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
 
 terminalPrintExtCString :: MonadIO m => Int -> Int -> Int -> Int -> Int -> CString -> m Dimensions
 terminalPrintExtCString x y w h align c = liftIO $ alloca (\dim -> c_terminal_print_ext_ptr (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h) (fromIntegral align) c dim >> peek dim)
 
-terminalPrintExtRectCString :: MonadIO m => Rectangle Int -> Int -> CString -> m Dimensions
-terminalPrintExtRectCString Rectangle{..} = terminalPrintExtCString x y width height
-
 terminalPrintExtBS :: MonadIO m => Int -> Int -> Int -> Int -> Int -> ByteString -> m Dimensions
 terminalPrintExtBS x y w h align = bsToCString (terminalPrintExtCString x y w h align)
 
-terminalPrintExtRectBS :: MonadIO m => Rectangle Int -> Int -> ByteString -> m Dimensions
-terminalPrintExtRectBS Rectangle{..} = terminalPrintExtBS x y width height
-
 terminalPrintExtText :: MonadIO m => Int -> Int -> Int -> Int -> Int -> Text -> m Dimensions
 terminalPrintExtText x y w h align = textToCString (terminalPrintExtCString x y w h align)
-
-terminalPrintExtRectText :: MonadIO m => Rectangle Int -> Int -> Text -> m Dimensions
-terminalPrintExtRectText Rectangle{..} = terminalPrintExtText x y width height
 
 -- I don't know if wchar is actually useful here.
 -- I don't care enough to try and wrap va_list around the printf variants.
@@ -213,7 +191,7 @@ terminalPrintExtRectText Rectangle{..} = terminalPrintExtText x y width height
 -- also read_wstr
 -- not bothering with: color_from_name, color_from_argb
 
-foreign import capi unsafe "BearMonadTerminal.h terminal_measure_ptr" c_terminal_measure_ptr :: CString -> Ptr Dimensions -> IO ()
+foreign import capi unsafe "BearLibTerminalExtras.h terminal_measure_ptr" c_terminal_measure_ptr :: CString -> Ptr Dimensions -> IO ()
 
 terminalMeasureCString :: MonadIO m => CString -> m Dimensions
 terminalMeasureCString c = liftIO $ alloca (\dim -> c_terminal_measure_ptr c dim >> peek dim)
@@ -224,7 +202,7 @@ terminalMeasureBS = bsToCString terminalMeasureCString
 terminalMeasureText :: MonadIO m => Text -> m Dimensions
 terminalMeasureText = textToCString terminalMeasureCString
 
-foreign import capi unsafe "BearMonadTerminal.h terminal_measure_ext_ptr" c_terminal_measure_ext_ptr :: CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
+foreign import capi unsafe "BearLibTerminalExtras.h terminal_measure_ext_ptr" c_terminal_measure_ext_ptr :: CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
 
 terminalMeasureExtCString :: MonadIO m => Int -> Int -> CString -> m Dimensions
 terminalMeasureExtCString w h c = liftIO $ alloca (\dim -> c_terminal_measure_ext_ptr (fromIntegral w) (fromIntegral h) c dim >> peek dim)

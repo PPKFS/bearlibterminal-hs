@@ -40,7 +40,7 @@ library
   import: common-options
   hs-source-dirs:  src
   exposed-modules:
-    BearMonadTerminal
+    BearLibTerminal
     BearLibTerminal.Raw
   extra-libraries: stdc++ BearLibTerminal
   include-dirs:

@@ -1,6 +1,6 @@
 module Main where
 
-import BearMonadTerminal
+import BearLibTerminalExtras
 import BearLibTerminal.Raw
 import Control.Monad
 import Control.Exception
@@ -22,7 +22,7 @@ runLoop = do
   putStrLn "hi"
   void $ terminalPrintText 2 23 "[color=orange]ESC.[/color] Exit"
   void $ terminalPrintExtText 77 22 0 0 alignRight "library version 0.1.0.0"
-  void $ terminalPrintExtText 77 23 0 0 alignRight "bearmonadterminal (Hello from Haskell!)"
+  void $ terminalPrintExtText 77 23 0 0 alignRight "BearLibTerminalExtras (Hello from Haskell!)"
   terminalRefresh
   c <- terminalReadCode
   case c of
