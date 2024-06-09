@@ -1,4 +1,4 @@
-# Project Title
+# bearlibterminal-hs
 
 Low-level Haskell bindings to the [BearLibTerminal](http://foo.wyrd.name/en:bearlibterminal) graphics library, primarily for roguelike games.
 
