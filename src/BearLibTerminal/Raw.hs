@@ -243,5 +243,3 @@ foreign import capi safe "BearLibTerminal.h terminal_delay" c_terminal_delay :: 
 
 terminalDelay :: MonadIO m => Int -> m ()
 terminalDelay = liftIO . c_terminal_delay . fromIntegral
-
-
