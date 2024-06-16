@@ -49,6 +49,9 @@ library
   includes:
     cbits/BearLibTerminal.h
     cbits/BearLibTerminalExtras.h
+  install-includes:
+    cbits/BearLibTerminal.h
+    cbits/BearLibTerminalExtras.h
 
 executable omni
   import: common-options
