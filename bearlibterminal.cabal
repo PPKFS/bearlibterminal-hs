@@ -46,6 +46,9 @@ library
   extra-libraries: stdc++ BearLibTerminal
   include-dirs:
     cbits
+  includes:
+    cbits/BearLibTerminal.h
+    cbits/BearLibTerminalExtras.h
 
 executable omni
   import: common-options
