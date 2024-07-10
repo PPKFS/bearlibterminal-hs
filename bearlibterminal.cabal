@@ -43,6 +43,7 @@ library
   exposed-modules:
     BearLibTerminal
     BearLibTerminal.Raw
+    BearLibTerminal.Keycodes
   extra-libraries: stdc++ BearLibTerminal
   include-dirs:
     cbits

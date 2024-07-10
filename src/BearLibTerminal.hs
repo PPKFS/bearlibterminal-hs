@@ -32,6 +32,7 @@ module BearLibTerminal
 
   -- | For setting stateful output options (cell colors, layers, and composition).
   -- Yes, it would be great to have this in a more declarative style but that's out of the scope of this library. :)
+  --
   -- ** Color
   -- *** Foreground
   , terminalColorUInt
@@ -51,11 +52,12 @@ module BearLibTerminal
   -- ** Layer
   , terminalLayer
   -- * Output
-  -- ** Clear
-  , terminalClear
-  , terminalClearArea
-  , terminalCrop
   -- ** Print
+
+  -- | These wrap @terminal_print@ and @terminal_print_ext@ in various string flavours.
+  -- These *do* support the inline formatting options that BearLibTerminal itself supports, such as using @[color=red]@,
+  -- pixel offsets, different fonts, and more. For more information check the BearLibTerminal documentation for
+  -- [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
   , terminalPrintText
   , terminalPrintString
   , terminalPrintBS
@@ -78,6 +80,10 @@ module BearLibTerminal
 
   -- ** Refresh
   , terminalRefresh
+  -- ** Clear
+  , terminalClear
+  , terminalClearArea
+  , terminalCrop
   -- * Input
   -- ** Events
   , Event(..)
@@ -117,14 +123,14 @@ import Foreign
 
 -- | Create a new window with the default parameters. Does not display the window until the first call to `terminalRefresh`.
 --
--- Wrapper around [@terminal_open@](http://foo.wyrd.name/en:bearlibterminal:reference).
+-- Wrapper around [@terminal_open@](http://foo.wyrd.name/en:bearlibterminal:reference#open).
 terminalOpen :: MonadIO m
   => m Bool -- ^ whether the window creation was successful.
 terminalOpen = asBool <$> liftIO c_terminal_open
 
 -- | Close the window and cleanup the BearLibTerminal instance.
 --
--- Wrapper around [@terminal_close@](http://foo.wyrd.name/en:bearlibterminal:reference).
+-- Wrapper around [@terminal_close@](http://foo.wyrd.name/en:bearlibterminal:reference#close).
 terminalClose :: MonadIO m => m ()
 terminalClose = liftIO c_terminal_close
 
@@ -155,7 +161,7 @@ terminalSetBS :: MonadIO m =>
   -> m Bool -- ^ whether the configuration was successful.
 terminalSetBS = bsToCString terminalSetCString
 
--- | Set one or more of the configuration options, given as a `Text`. You should prefer this one.
+-- | Set one or more of the configuration options, given as a `Text`.
 --
 -- Wrapper around [@terminal_set@](http://foo.wyrd.name/en:bearlibterminal:reference).
 -- More details are available at the BearLibTerminal docs: http://foo.wyrd.name/en:bearlibterminal:reference:configuration.
@@ -239,15 +245,27 @@ terminalPutExt x y dx dy code mbColors = liftIO $ colorsToArr $ c_terminal_put_e
       Nothing -> f nullPtr
       Just (tl, bl, br, tr) -> withArray (map fromIntegral [tl, bl, br, tr]) f
 
+-- | Print a string to the screen, given as a `CString`.
+--
+-- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
 terminalPrintCString :: MonadIO m => Int -> Int -> CString -> m Dimensions
 terminalPrintCString x y c = liftIO $ alloca (\dim -> c_terminal_print_ptr (fromIntegral x) (fromIntegral y) c dim >> peek dim)
 
+-- | Print a string to the screen, given as a `ByteString`.
+--
+-- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
 terminalPrintBS :: MonadIO m => Int -> Int -> ByteString -> m Dimensions
 terminalPrintBS x y = bsToCString (terminalPrintCString x y)
 
+-- | Print a string to the screen, given as a `String`.
+--
+-- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
 terminalPrintString :: MonadIO m => Int -> Int -> String -> m Dimensions
 terminalPrintString x y = stringToCString (terminalPrintCString x y)
 
+-- | Print a string to the screen, given as a `Text`.
+--
+-- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
 terminalPrintText :: MonadIO m => Int -> Int -> Text -> m Dimensions
 terminalPrintText x y = textToCString (terminalPrintCString x y)
 
