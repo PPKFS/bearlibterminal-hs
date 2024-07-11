@@ -3,17 +3,19 @@
 module BearLibTerminal
   (
 
-  -- | A low-ish level binding to BearLibTerminal. For the most part this is 1-to-1 to the original C/C++ API
-  -- and the raw bindings in `BearLibTerminal.Raw` are almost identical (the only differences being that intcode
-  -- return types are wrapped into Booleans where relevant).
-  --
-  -- For functions that expect strings, 4 variants exist:
-  --
-  -- - `Text` (strongly preferred)
-  -- - `String`
-  -- - `ByteString`
-  -- - `CString` (avoid unless you want to do memory management and marshalling yourself)
+  {- | A low-ish level binding to BearLibTerminal. For the most part this is 1-to-1 to the original C/C++ API
+    and the raw bindings in `BearLibTerminal.Raw` are almost identical (the only differences being that intcode
+    return types are wrapped into Booleans where relevant).
+  For functions that expect strings, 4 variants exist:
 
+    - `Text` (strongly preferred)
+    - `String`
+    - `ByteString`
+    - `CString` (avoid unless you want to do memory management and marshalling yourself)
+
+  As this library is a low-level wrapper, the original BearLibTerminal documentation is an excellent reference!
+  http://foo.wyrd.name/en:bearlibterminal:reference
+  -}
   -- * Initialisation and configuration
   -- ** Open
   -- | For initialising a BearLibTerminal instance and opening a window.
@@ -29,12 +31,9 @@ module BearLibTerminal
   , terminalSetBS
   , terminalSetCString
   -- * Output state
-
-  -- | For setting stateful output options (cell colors, layers, and composition).
-  -- Yes, it would be great to have this in a more declarative style but that's out of the scope of this library. :)
-  --
   -- ** Color
   -- *** Foreground
+
   , terminalColorUInt
   , terminalColorNameText
   , terminalColorNameString
@@ -170,74 +169,266 @@ terminalSetText :: MonadIO m =>
   -> m Bool -- ^ whether the configuration was successful.
 terminalSetText = textToCString terminalSetCString
 
-terminalColorUInt :: MonadIO m => CUInt -> m ()
+-- | Set the currently selected foreground color to be used by following output functions (e.g. print).
+-- Takes a color as a 32-bit unsigned integer in ARGB format.
+-- Wrapper around [@terminal_color@](http://foo.wyrd.name/en:bearlibterminal:reference#color).
+terminalColorUInt ::
+  MonadIO m
+  => CUInt -- ^ the color to set in 32-bit ARGB format.
+  -> m ()
 terminalColorUInt = liftIO . c_terminal_color_uint
 
-terminalColorNameCString :: MonadIO m => CString -> m ()
+-- | Set the currently selected foreground color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `CString`.
+--
+-- Wrapper around [@terminal_color@](http://foo.wyrd.name/en:bearlibterminal:reference#color) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalColorNameCString ::
+  MonadIO m
+  => CString  -- ^ the color name to be selected, in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
 terminalColorNameCString = liftIO . c_terminal_color_from_name
 
-terminalColorNameString :: MonadIO m => String -> m ()
+-- | Set the currently selected foreground color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `String`.
+--
+-- Wrapper around [@terminal_color@](http://foo.wyrd.name/en:bearlibterminal:reference#color) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalColorNameString ::
+  MonadIO m
+  => String  -- ^ the color name to be selected, in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
 terminalColorNameString = stringToCString terminalColorNameCString
 
-terminalColorNameText :: MonadIO m => Text -> m ()
+-- | Set the currently selected foreground color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `Text`.
+--
+-- Wrapper around [@terminal_color@](http://foo.wyrd.name/en:bearlibterminal:reference#color) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalColorNameText ::
+  MonadIO m
+  => Text -- ^ the color name to be selected,in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
 terminalColorNameText = textToCString terminalColorNameCString
 
-terminalColorNameBS :: MonadIO m => ByteString -> m ()
+-- | Set the currently selected foreground color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `ByteString`.
+--
+-- Wrapper around [@terminal_color@](http://foo.wyrd.name/en:bearlibterminal:reference#color) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalColorNameBS :: MonadIO m =>
+  ByteString -- ^ the color name to be selected,in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
 terminalColorNameBS = bsToCString terminalColorNameCString
 
-terminalBkColorUInt :: MonadIO m => CUInt -> m ()
+-- | Set the currently selected background color to be used by following output functions (e.g. print).
+-- Takes a color as a 32-bit unsigned integer in ARGB format.
+-- Wrapper around [@terminal_bkcolor@](http://foo.wyrd.name/en:bearlibterminal:reference#bkcolor).
+terminalBkColorUInt ::
+  MonadIO m
+  => CUInt -- ^ the color to set in 32-bit ARGB format.
+  -> m ()
 terminalBkColorUInt = liftIO . c_terminal_bkcolor_uint
 
-terminalBkColorNameString :: MonadIO m => String -> m ()
-terminalBkColorNameString = stringToCString terminalColorNameCString
-
-terminalBkColorNameCString :: MonadIO m => CString -> m ()
+-- | Set the currently selected foreground color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `CString`.
+--
+-- Wrapper around [@terminal_bkcolor@](http://foo.wyrd.name/en:bearlibterminal:reference#bkcolor) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalBkColorNameCString ::
+  MonadIO m
+  => CString  -- ^ the color name to be selected, in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
 terminalBkColorNameCString = liftIO . c_terminal_bkcolor_from_name
 
-terminalBkColorNameText :: MonadIO m => Text -> m ()
+-- | Set the currently selected background color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `String`.
+--
+-- Wrapper around [@terminal_bkcolor@](http://foo.wyrd.name/en:bearlibterminal:reference#bkcolor) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalBkColorNameString ::
+  MonadIO m
+  => String  -- ^ the color name to be selected, in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
+terminalBkColorNameString = stringToCString terminalBkColorNameCString
+
+-- | Set the currently selected background color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `Text`.
+--
+-- Wrapper around [@terminal_bkcolor@](http://foo.wyrd.name/en:bearlibterminal:reference#bkcolor) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalBkColorNameText ::
+  MonadIO m
+  => Text -- ^ the color name to be selected, in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
 terminalBkColorNameText = textToCString terminalBkColorNameCString
 
-terminalBkColorNameBS :: MonadIO m => ByteString -> m ()
+-- | Set the currently selected background color to be used by following output functions (e.g. `terminalPrintText`).
+-- Takes a color as a name in a variety of formats; see [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name)
+-- for a full list.
+--
+-- Takes the color name as a `ByteString`.
+--
+-- Wrapper around [@terminal_bkcolor@](http://foo.wyrd.name/en:bearlibterminal:reference#bkcolor) and
+-- [@color_from_name@](http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name).
+terminalBkColorNameBS :: MonadIO m =>
+  ByteString -- ^ the color name to be selected, in @"[brightness]hue"@ format as specified in @color_from_name@.
+  -> m ()
 terminalBkColorNameBS = bsToCString terminalBkColorNameCString
 
-terminalPut :: MonadIO m => Int -> Int -> Int -> m ()
+-- | Draw a single character (given by its code point) onto the screen on the currently selected layer
+-- with the currently selected colors. This takes an `Int` rather than `Char` to avoid possible headaches
+-- with mismatching character codes over string conversion. If you know you are wanting to render single
+-- *characters* (rather than *code points*), consider using `terminalPrintText` (or similar) instead.
+--
+-- Wrapper around [@terminal_put@](http://foo.wyrd.name/en:bearlibterminal:reference#put)
+terminalPut ::
+  MonadIO m
+  => Int -- ^ x-coordinate to print the character to.
+  -> Int -- ^ y-coordinate to print the character to.
+  -> Int -- ^ Unicode code point of the character to print.
+  -> m ()
 terminalPut x y c = liftIO $ c_terminal_put (fromIntegral x) (fromIntegral y) (fromIntegral c)
 
-data TerminalCompositionMode = CompositionOn | CompositionOff
+-- | Data type to represent whether cell composition should be turned on or off.
+data TerminalCompositionMode =
+  CompositionOn -- ^ Turn cell composition on; i.e. repeated prints to the same location on the same layer will stack the tiles.
+  | CompositionOff-- ^ Turn cell composition off; i.e. repeated prints to the same location on the same layer will overwrite the existing tiles.
   deriving stock (Eq, Ord, Show, Generic, Read, Enum, Bounded)
 
-terminalComposition :: MonadIO m => TerminalCompositionMode -> m ()
+-- | Enable or disable terminal composition.
+--
+-- Wrapper around [@terminal_composition@](http://foo.wyrd.name/en:bearlibterminal:reference#composition)
+terminalComposition ::
+  MonadIO m
+  => TerminalCompositionMode -- ^ composition mode to set.
+  -> m ()
 terminalComposition = liftIO . c_terminal_composition .
   (\case
     CompositionOff -> 0
     CompositionOn -> 1
   )
 
-terminalLayer :: MonadIO m => Int -> m ()
+-- | Set the currently selected layer to be used by following output functions (e.g. `terminalPrintText`).
+--
+-- Wrapper around [@terminal_layer@](http://foo.wyrd.name/en:bearlibterminal:reference#layer).
+terminalLayer ::
+  MonadIO m
+  => Int -- ^ layer to select (0-255 inclusive).
+  -> m ()
 terminalLayer = liftIO . c_terminal_layer . fromIntegral
 
+-- | Clear the entire screen (all layers) with the currently selected background color (`terminalBkColorUInt` and family).
+--
+-- Wrapper around [@terminal_clear@](http://foo.wyrd.name/en:bearlibterminal:reference#clear).
 terminalClear :: MonadIO m => m ()
 terminalClear = liftIO c_terminal_clear
 
-terminalClearArea :: MonadIO m => Int -> Int -> Int -> Int -> m ()
+-- | Clear a rectangular area on the currently selected layer. This only sets the background color
+-- on layer 0.
+--
+-- Wrapper around [@terminal_clear_area@](http://foo.wyrd.name/en:bearlibterminal:reference#clear_area).
+terminalClearArea ::
+  MonadIO m
+  => Int -- ^ x-coordinate of the top left of the rectangular area.
+  -> Int -- ^ y-coordinate of the top left of the rectangular area.
+  -> Int -- ^ width of the rectangular area.
+  -> Int  -- ^ height of the rectangular area.
+  -> m ()
 terminalClearArea x y w h = liftIO (c_terminal_clear_area (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h))
 
-terminalCrop :: MonadIO m => Int -> Int -> Int -> Int -> m ()
+-- | Set a cropping area for the currently selected layer. Anything printed outside of this region
+-- will be ignored. Set the width or height to zero or use `terminalClear` to reset this.
+--
+-- Wrapper around [@terminal_crop@](http://foo.wyrd.name/en:bearlibterminal:reference#crop).
+terminalCrop ::
+  MonadIO m
+  => Int -- ^ x-coordinate of the top left of the rectangular area.
+  -> Int -- ^ y-coordinate of the top left of the rectangular area.
+  -> Int -- ^ width of the rectangular area.
+  -> Int  -- ^ height of the rectangular area.
+  -> m ()
 terminalCrop x y w h = liftIO (c_terminal_crop (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h))
 
+-- | Commit the scene to be rendered and redraw the window. This needs to be called once after `terminalOpen`
+-- before the window will be displayed.
+--
+-- Wrapper around [@terminal_refresh@](http://foo.wyrd.name/en:bearlibterminal:reference#crop).
 terminalRefresh :: MonadIO m => m ()
 terminalRefresh = liftIO c_terminal_refresh
 
-terminalPick :: MonadIO m => Int -> Int -> Int -> m Int
-terminalPick x y i = liftIO $ fromIntegral <$> c_terminal_pick (fromIntegral x) (fromIntegral y) (fromIntegral i)
+-- | Return the code of the tile in the specified cell on the current layer at the current index
+-- in the tile stack.
+--
+-- Wrapper around [@terminal_pick@](http://foo.wyrd.name/en:bearlibterminal:reference#pick).
+terminalPick ::
+  MonadIO m
+  => Int -- ^ x-coordinate of the tile to be queried.
+  -> Int -- ^ y-coordinate of the tile to be queried.
+  -> Int  -- ^ index of the symbol in the cell to be returned.
+  -> m (Maybe Int) -- ^ `Just codepoint` if the symbol exists and `Nothing` otherwise.
+terminalPick x y i = liftIO $ (\x' -> if x' == 0 then Nothing else Just $ fromIntegral x') <$> c_terminal_pick (fromIntegral x) (fromIntegral y) (fromIntegral i)
 
-terminalPickColor :: MonadIO m => Int -> Int -> Int -> m Integer
+-- | Return the foreground color of the tile in the specified cell on the current layer at the current index
+-- in the tile stack.
+--
+-- Wrapper around [@terminal_pick_color@](http://foo.wyrd.name/en:bearlibterminal:reference#pick_color).
+terminalPickColor ::
+  MonadIO m
+  => Int -- ^ x-coordinate of the tile to be queried.
+  -> Int -- ^ y-coordinate of the tile to be queried.
+  -> Int  -- ^ index of the symbol in the cell to be returned.
+  -> m Integer -- ^ Color of the foreground if the symbol exists.
 terminalPickColor x y i = liftIO $ fromIntegral <$> c_terminal_pick_color (fromIntegral x) (fromIntegral y) (fromIntegral i)
 
-terminalPickBkColor :: MonadIO m => Int -> Int -> m Integer
+-- | Return the background color of the tile in the specified cell.
+--
+-- Wrapper around [@terminal_pick_bkcolor@](http://foo.wyrd.name/en:bearlibterminal:reference#pick_bkcolor).
+terminalPickBkColor ::
+  MonadIO m
+  => Int -- ^ x-coordinate of the tile to be queried.
+  -> Int -- ^ y-coordinate of the tile to be queried.
+  -> m Integer -- ^ Color of the background of the cell.
 terminalPickBkColor x y = liftIO $ fromIntegral <$> c_terminal_pick_bkcolor (fromIntegral x) (fromIntegral y)
 
-terminalPutExt :: MonadIO m => Int -> Int -> Int -> Int -> Int -> Maybe (Integer, Integer, Integer, Integer) -> m ()
+-- | Draw a single character (given by its code point) onto the screen on the currently selected layer
+-- with the currently selected colors and with additional options.
+-- This takes an `Int` rather than `Char` to avoid possible headaches
+-- with mismatching character codes over string conversion. If you know you are wanting to render single
+-- *characters* (rather than *code points*), consider using `terminalPrintText` (or similar) instead.
+--
+-- Wrapper around [@terminal_put@](http://foo.wyrd.name/en:bearlibterminal:reference#put_ext)
+terminalPutExt ::
+  MonadIO m
+  => Int -- ^ x-coordinate to print the character to.
+  -> Int -- ^ y-coordinate to print the character to.
+  -> Int -- ^ Internal x offset relative to the normal position of a tile in the cell, in pixels.
+  -> Int -- ^ Internal y offset relative to the normal position of a tile in the cell, in pixels.
+  -> Int -- ^ Unicode code point of the character to print.
+  -> Maybe (Integer, Integer, Integer, Integer) -- ^ individual colours specified per-corner for this
+  -- tile (in order: top-left, bottom-left, bottom-right, top-right)
+  -> m ()
 terminalPutExt x y dx dy code mbColors = liftIO $ colorsToArr $ c_terminal_put_ext (fromIntegral x) (fromIntegral y) (fromIntegral dx) (fromIntegral dy) (fromIntegral code)
   where
     colorsToArr :: (Ptr CUInt -> IO a) -> IO a
@@ -248,27 +439,50 @@ terminalPutExt x y dx dy code mbColors = liftIO $ colorsToArr $ c_terminal_put_e
 -- | Print a string to the screen, given as a `CString`.
 --
 -- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
-terminalPrintCString :: MonadIO m => Int -> Int -> CString -> m Dimensions
+terminalPrintCString ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> CString -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintCString x y c = liftIO $ alloca (\dim -> c_terminal_print_ptr (fromIntegral x) (fromIntegral y) c dim >> peek dim)
 
 -- | Print a string to the screen, given as a `ByteString`.
 --
 -- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
-terminalPrintBS :: MonadIO m => Int -> Int -> ByteString -> m Dimensions
+terminalPrintBS ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> ByteString -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintBS x y = bsToCString (terminalPrintCString x y)
 
 -- | Print a string to the screen, given as a `String`.
 --
 -- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
-terminalPrintString :: MonadIO m => Int -> Int -> String -> m Dimensions
+terminalPrintString ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> String -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintString x y = stringToCString (terminalPrintCString x y)
 
 -- | Print a string to the screen, given as a `Text`.
 --
 -- Wrapper around [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
-terminalPrintText :: MonadIO m => Int -> Int -> Text -> m Dimensions
+terminalPrintText ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> Text -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintText x y = textToCString (terminalPrintCString x y)
 
+-- | Print a string to the screen, given as a `CString`, with some additional options.
+-- TODO: these alignment issues should really be their own type rather than an int.
+-- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)
 terminalPrintExtCString :: MonadIO m => Int -> Int -> Int -> Int -> Int -> CString -> m Dimensions
 terminalPrintExtCString x y w h align c = liftIO $ alloca (\dim -> c_terminal_print_ext_ptr (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h) (fromIntegral align) c dim >> peek dim)
 
