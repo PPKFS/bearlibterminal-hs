@@ -2,7 +2,6 @@
 
 module BearLibTerminal
   (
-
   {- | A low-ish level binding to BearLibTerminal. For the most part this is 1-to-1 to the original C/C++ API
     and the raw bindings in `BearLibTerminal.Raw` are almost identical (the only differences being that intcode
     return types are wrapped into Booleans where relevant).
@@ -115,10 +114,11 @@ import Control.Monad.IO.Class
 import Foreign.C.String
 import Data.ByteString ( ByteString )
 import Data.Text (Text)
-import Foreign.C (CUInt)
+import Foreign.C (CUInt, CInt)
 import Foreign.Marshal.Alloc
 import qualified Data.Text.Foreign as T
 import Foreign
+import Data.Maybe
 
 -- | Create a new window with the default parameters. Does not display the window until the first call to `terminalRefresh`.
 --
@@ -480,19 +480,71 @@ terminalPrintText ::
   -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintText x y = textToCString (terminalPrintCString x y)
 
--- | Print a string to the screen, given as a `CString`, with some additional options.
--- TODO: these alignment issues should really be their own type rather than an int.
--- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)
-terminalPrintExtCString :: MonadIO m => Int -> Int -> Int -> Int -> Int -> CString -> m Dimensions
-terminalPrintExtCString x y w h align c = liftIO $ alloca (\dim -> c_terminal_print_ext_ptr (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h) (fromIntegral align) c dim >> peek dim)
+data PrintAlignment = AlignDefault | AlignLeft | AlignRight | AlignCenter | AlignTop | AlignBottom | AlignMiddle
+  deriving stock (Eq, Ord, Bounded, Enum, Generic, Show, Read)
 
-terminalPrintExtBS :: MonadIO m => Int -> Int -> Int -> Int -> Int -> ByteString -> m Dimensions
+-- | Print a string to the screen, given as a `CString`, with (optional) auto-wrapping and alignment.
+-- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)
+terminalPrintExtCString ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> Int -- ^ width of the bounding box for auto-wrapping and alignment.
+  -> Int -- ^ height of the bounding box for auto-wrapping and alignment.
+  -> Maybe PrintAlignment -- ^ alignment of the string within the bounding box.
+  -> CString -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
+terminalPrintExtCString x y w h mbAlign c =
+  let align :: CInt
+      align = fromMaybe AlignDefault mbAlign & \case
+        AlignDefault -> 0
+        AlignLeft -> 1
+        AlignRight -> 2
+        AlignCenter -> 3
+        AlignTop -> 4
+        AlignBottom -> 8
+        AlignMiddle -> 12
+  in
+  liftIO $ alloca (\dim -> c_terminal_print_ext_ptr
+    (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h) align c dim >> peek dim)
+
+-- | Print a string to the screen, given as a `ByteString`, with (optional) auto-wrapping and alignment.
+-- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)
+terminalPrintExtBS ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> Int -- ^ width of the bounding box for auto-wrapping and alignment.
+  -> Int -- ^ height of the bounding box for auto-wrapping and alignment.
+  -> Maybe PrintAlignment -- ^ alignment of the string within the bounding box.
+  -> ByteString -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintExtBS x y w h align = bsToCString (terminalPrintExtCString x y w h align)
 
-terminalPrintExtString :: MonadIO m => Int -> Int -> Int -> Int -> Int -> String -> m Dimensions
+-- | Print a string to the screen, given as a `String`, with (optional) auto-wrapping and alignment.
+-- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)
+terminalPrintExtString ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> Int -- ^ width of the bounding box for auto-wrapping and alignment.
+  -> Int -- ^ height of the bounding box for auto-wrapping and alignment.
+  -> Maybe PrintAlignment -- ^ alignment of the string within the bounding box.
+  -> String -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintExtString x y w h align = stringToCString (terminalPrintExtCString x y w h align)
 
-terminalPrintExtText :: MonadIO m => Int -> Int -> Int -> Int -> Int -> Text -> m Dimensions
+-- | Print a string to the screen, given as a `Text`, with (optional) auto-wrapping and alignment.
+-- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)
+terminalPrintExtText ::
+  MonadIO m
+  => Int  -- ^ x-coordinate to start printing the string at.
+  -> Int -- ^ y-coordinate to start printing the string at.
+  -> Int -- ^ width of the bounding box for auto-wrapping and alignment.
+  -> Int -- ^ height of the bounding box for auto-wrapping and alignment.
+  -> Maybe PrintAlignment -- ^ alignment of the string within the bounding box.
+  -> Text -- ^ the string to print.
+  -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintExtText x y w h align = textToCString (terminalPrintExtCString x y w h align)
 
 terminalMeasureCString :: MonadIO m => CString -> m Dimensions
