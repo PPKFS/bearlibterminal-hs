@@ -119,6 +119,7 @@ import Foreign.Marshal.Alloc
 import qualified Data.Text.Foreign as T
 import Foreign
 import Data.Maybe
+import Control.Exception
 
 -- | Create a new window with the default parameters. Does not display the window until the first call to `terminalRefresh`.
 --
@@ -584,8 +585,19 @@ terminalPeekCode :: MonadIO m => m Int
 terminalPeekCode = liftIO $ fromIntegral <$> c_terminal_peek
 
 terminalReadStr :: MonadIO m => Int -> Int -> Int -> m (Maybe Text)
-terminalReadStr x y m = liftIO $ alloca (\c -> c_read_str (fromIntegral x) (fromIntegral y) c (fromIntegral m) >>=
-  \res -> if res == -1 then return Nothing else Just <$> T.peekCStringLen (c, fromIntegral res))
+terminalReadStr x y m = liftIO $ bracket
+  (callocBytes 200)
+  free
+  (\p -> do
+    res <- c_read_str (fromIntegral x) (fromIntegral y) p (fromIntegral m)
+    if res == -1 || res == 0 then return Nothing else
+        (do
+          t <- T.peekCStringLen (p, fromIntegral res)
+          return (Just t)) `catch` (\(SomeException _) -> do
+            print ("failed to decode " <> show res)
+            raw <- peekArray (fromIntegral res) p
+            print (map castCCharToChar raw, show res) >> return Nothing)
+  )
 
 terminalDelay :: MonadIO m => Int -> m ()
 terminalDelay = liftIO . c_terminal_delay . fromIntegral

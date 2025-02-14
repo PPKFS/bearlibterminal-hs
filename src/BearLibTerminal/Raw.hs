@@ -68,11 +68,11 @@ foreign import capi safe "BearLibTerminal.h terminal_refresh" c_terminal_refresh
 
 foreign import capi safe "BearLibTerminal.h terminal_put" c_terminal_put :: CInt -> CInt -> CInt -> IO ()
 
-foreign import capi unsafe "BearLibTerminal.h terminal_pick" c_terminal_pick :: CInt -> CInt -> CInt -> IO CInt
+foreign import capi safe "BearLibTerminal.h terminal_pick" c_terminal_pick :: CInt -> CInt -> CInt -> IO CInt
 
-foreign import capi unsafe "BearLibTerminal.h terminal_pick_color" c_terminal_pick_color :: CInt -> CInt -> CInt -> IO CUInt
+foreign import capi safe "BearLibTerminal.h terminal_pick_color" c_terminal_pick_color :: CInt -> CInt -> CInt -> IO CUInt
 
-foreign import capi unsafe "BearLibTerminal.h terminal_pick_bkcolor" c_terminal_pick_bkcolor :: CInt -> CInt -> IO CUInt
+foreign import capi safe "BearLibTerminal.h terminal_pick_bkcolor" c_terminal_pick_bkcolor :: CInt -> CInt -> IO CUInt
 
 foreign import capi safe "BearLibTerminal.h terminal_put_ext" c_terminal_put_ext :: CInt -> CInt -> CInt -> CInt -> CInt -> Ptr CUInt -> IO ()
 
@@ -88,9 +88,9 @@ foreign import capi safe "BearLibTerminalExtras.h terminal_print_ext_ptr" c_term
 -- also read_wstr
 -- not bothering with: color_from_name, color_from_argb
 
-foreign import capi unsafe "BearLibTerminalExtras.h terminal_measure_ptr" c_terminal_measure_ptr :: CString -> Ptr Dimensions -> IO ()
+foreign import capi safe "BearLibTerminalExtras.h terminal_measure_ptr" c_terminal_measure_ptr :: CString -> Ptr Dimensions -> IO ()
 
-foreign import capi unsafe "BearLibTerminalExtras.h terminal_measure_ext_ptr" c_terminal_measure_ext_ptr :: CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
+foreign import capi safe "BearLibTerminalExtras.h terminal_measure_ext_ptr" c_terminal_measure_ext_ptr :: CInt -> CInt -> CString -> Ptr Dimensions -> IO ()
 
 foreign import capi safe "BearLibTerminal.h terminal_state" c_terminal_state :: CInt -> IO CInt
 
