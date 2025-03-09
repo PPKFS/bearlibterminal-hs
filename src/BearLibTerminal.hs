@@ -95,7 +95,7 @@ module BearLibTerminal
   , terminalRead
   , terminalReadCode
   -- ** Reading strings
-  , terminalReadStr
+  , terminalReadString
   -- ** State
   , terminalState
   -- ** Picking
@@ -121,6 +121,8 @@ import Foreign
 import Data.Maybe
 import Control.Exception
 
+maxStringReadSizeInBytes :: Int
+maxStringReadSizeInBytes = 8192
 -- | Create a new window with the default parameters. Does not display the window until the first call to `terminalRefresh`.
 --
 -- Wrapper around [@terminal_open@](http://foo.wyrd.name/en:bearlibterminal:reference#open).
@@ -506,8 +508,7 @@ terminalPrintExtCString x y w h mbAlign c =
         AlignBottom -> 8
         AlignMiddle -> 12
   in
-  liftIO $ alloca (\dim -> c_terminal_print_ext_ptr
-    (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h) align c dim >> peek dim)
+  liftIO $ alloca (\dim -> c_terminal_print_ext_ptr (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h) align c dim >> peek dim)
 
 -- | Print a string to the screen, given as a `ByteString`, with (optional) auto-wrapping and alignment.
 -- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)
@@ -548,45 +549,110 @@ terminalPrintExtText ::
   -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
 terminalPrintExtText x y w h align = textToCString (terminalPrintExtCString x y w h align)
 
-terminalMeasureCString :: MonadIO m => CString -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, given as a `CString`.
+-- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureCString ::
+  MonadIO m
+  => CString -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureCString c = liftIO $ alloca (\dim -> c_terminal_measure_ptr c dim >> peek dim)
 
-terminalMeasureBS :: MonadIO m => ByteString -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, given as a `ByteString`.
+-- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureBS ::
+  MonadIO m
+  => ByteString -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureBS = bsToCString terminalMeasureCString
 
-terminalMeasureString :: MonadIO m => String -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, given as a `String`.
+-- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureString ::
+  MonadIO m
+  => String -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureString = stringToCString terminalMeasureCString
 
-terminalMeasureText :: MonadIO m => Text -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, given as a `Text`.
+-- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureText ::
+  MonadIO m
+  => Text -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureText = textToCString terminalMeasureCString
 
-terminalMeasureExtCString :: MonadIO m => Int -> Int -> CString -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `CString`.
+-- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureExtCString ::
+  MonadIO m
+  => Int -- ^ the width of the bounding box.
+  -> Int -- ^ the height of the bounding box.
+  -> CString  -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureExtCString w h c = liftIO $ alloca (\dim -> c_terminal_measure_ext_ptr (fromIntegral w) (fromIntegral h) c dim >> peek dim)
 
-terminalMeasureExtBS :: MonadIO m => Int -> Int -> ByteString -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `ByteString`.
+-- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureExtBS ::
+  MonadIO m
+  => Int -- ^ the width of the bounding box.
+  -> Int -- ^ the height of the bounding box.
+  -> ByteString  -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureExtBS w h = bsToCString (terminalMeasureExtCString w h)
 
-terminalMeasureExtText :: MonadIO m => Int -> Int -> Text -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `Text`.
+-- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureExtText ::
+  MonadIO m
+  => Int -- ^ the width of the bounding box.
+  -> Int -- ^ the height of the bounding box.
+  -> Text  -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureExtText w h = textToCString (terminalMeasureExtCString w h)
 
-terminalMeasureExtString :: MonadIO m => Int -> Int -> String -> m Dimensions
+-- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `String`.
+-- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureExtString ::
+  MonadIO m
+  => Int -- ^ the width of the bounding box.
+  -> Int -- ^ the height of the bounding box.
+  -> String  -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureExtString w h = stringToCString (terminalMeasureExtCString w h)
 
+-- TODO TODO TODO
 terminalState :: MonadIO m => Int -> m Int
 terminalState = liftIO . fmap fromIntegral . c_terminal_state . fromIntegral
 
-terminalHasInput :: MonadIO m => m Bool
+-- | Returns true if there are currently input events in the input queue.
+  -- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#has_input)
+terminalHasInput ::
+  MonadIO m
+  => m Bool -- ^ if there are currently input events in the input queue.
 terminalHasInput = liftIO $ asBool <$> c_terminal_has_input
 
+-- TODO
 terminalReadCode :: MonadIO m => m Int
 terminalReadCode = liftIO $ fromIntegral <$> c_terminal_read
 
+-- TODO
 terminalPeekCode :: MonadIO m => m Int
 terminalPeekCode = liftIO $ fromIntegral <$> c_terminal_peek
 
-terminalReadStr :: MonadIO m => Int -> Int -> Int -> m (Maybe Text)
-terminalReadStr x y m = liftIO $ bracket
-  (callocBytes 200)
+-- | Read an inputted string and print a text input prompt at the given location.
+-- This will block until the string is submitted (with Enter) or cancelled out (with Esc).
+-- The string can be up to `maxStringReadSizeInBytes` bytes long.
+-- Retyrns nothing if there was an error, or if the user cancelled out.
+  -- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#read_str)
+terminalReadString ::
+  MonadIO m
+  => Int -- ^ x-coord of where the user input is displayed.
+  -> Int -- ^ y-coord of where the user input is displayed.
+  -> Int -- ^ max string length allowed (for the user, not for technical reasons).
+  -> m (Maybe Text)
+terminalReadString x y m = liftIO $ bracket
+  (callocBytes maxStringReadSizeInBytes)
   free
   (\p -> do
     res <- c_read_str (fromIntegral x) (fromIntegral y) p (fromIntegral m)
@@ -598,8 +664,12 @@ terminalReadStr x y m = liftIO $ bracket
             raw <- peekArray (fromIntegral res) p
             print (map castCCharToChar raw, show res) >> return Nothing)
   )
-
-terminalDelay :: MonadIO m => Int -> m ()
+-- | Pause execution for a number of milliseconds.
+-- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#delay)
+terminalDelay ::
+  MonadIO m
+  => Int -- ^ amount of time to suspend program execution for, in milliseconds.
+  -> m ()
 terminalDelay = liftIO . c_terminal_delay . fromIntegral
 
 data Event =

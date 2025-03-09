@@ -10,6 +10,7 @@ import qualified Data.Vector as V
 import Data.Time.Clock
 import Data.Fixed
 import Data.Time.Clock.POSIX
+import BearLibTerminal
 
 testSpeed :: IO ()
 testSpeed = do
@@ -48,7 +49,7 @@ setupSpeedDemo :: IO ([(CUInt{-, CUInt-})], [Int])
 setupSpeedDemo = do
   let shifted = map (\i -> let c = shiftColor i in (highlightedColor c, dimmedColor c)) [0..80]
   r0 <- mapM (const $ randomRIO (0, 255)) [(0 :: Int)..2000]
-  pure (map fst shifted, r0)
+  pure (map (\x -> fst x) shifted, r0)
   {-
 
   unsigned int shift_f = 0, shift_b = 0, shift_f2 = 0;

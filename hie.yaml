@@ -1,0 +1,6 @@
+cradle:
+  cabal:
+    - path: "src"
+      component: "lib:bearlibterminal"
+    - path: "omni"
+      component: "executable:omni"
