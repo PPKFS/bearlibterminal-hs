@@ -1,37 +1,46 @@
 module Main where
 
 import BearLibTerminal
-import BearLibTerminal.Raw
 import Control.Monad
 import Control.Exception
 import Data.Text ( Text )
 import qualified Data.Text as T
-import Omni.Speed
+import Omni.BasicOutput
 
 main :: IO ()
 main = do
   bracket_
-    (void terminalOpen >> resetTerminal)
-    (void terminalClose)
+    (terminalOpen_ >> resetTerminal)
+    terminalClose
     runLoop
 
 runLoop :: IO ()
 runLoop = do
   terminalClear
   printEntries
-  putStrLn "hi"
-  void $ terminalPrintText 2 23 "[color=orange]ESC.[/color] Exit"
-  void $ terminalPrintExtText 77 22 0 0 alignRight "library version 0.1.0.0"
-  void $ terminalPrintExtText 77 23 0 0 alignRight "BearLibTerminalExtras (Hello from Haskell!)"
+  void $ terminalPrint 2 23 "[color=orange]ESC.[/color] Exit"
+  void $ terminalPrintExt 77 22 0 0 (Just AlignRight) "library version 0.1.0.0"
+  void $ terminalPrintExt 77 23 0 0 (Just AlignRight) "BearLibTerminal (Hello from Haskell!)"
   terminalRefresh
-  c <- terminalReadCode
+  c <- terminalRead
   case c of
-    224 -> return ()
-    41 -> testSpeed
+    Keypress TkEsc -> return ()
+    WindowEvent WindowClose -> return ()
+    Keypress Tk1 -> runUntilEsc basicOutput
     x -> do
       print x
       runLoop
 
+runUntilEsc :: IO () -> IO ()
+runUntilEsc f = do
+  f
+  c <- terminalRead
+  case c of
+    WindowEvent WindowClose -> return ()
+    Keypress TkEsc -> runLoop
+    x -> do
+      print x
+      runUntilEsc f
 entries :: [(Text, IO ())]
 entries =
   [ ("Basic output", return ())
@@ -57,9 +66,9 @@ entries =
   ]
 
 printEntry :: (Int, (Text, IO ())) -> IO ()
-printEntry (i, (n, ac)) = do
+printEntry (i, (n, _)) = do
   let shortcut = toEnum $ if i < 9 then fromEnum '1' + i else fromEnum 'a' + (i-9)
-  void $ terminalPrintText 2 (1+i) (mconcat ["[color=orange]", T.singleton shortcut, ".[/color][color=gray]", n])
+  void $ terminalPrint 2 (1+i) (mconcat ["[color=orange]", T.singleton shortcut, ".[/color][color=gray]", n])
 
 printEntries :: IO ()
 printEntries = mapM_ printEntry (zip [0..] entries)
@@ -72,4 +81,4 @@ resetTerminal = do
   -- TODO: I moved all the actual helper stuff to roguefunctor..
   -- todo: font:default, input filter to keyboard
   --void $ terminalSetText "" defaultWindowOptions { title = Just "Omni: menu" }
-  terminalColorNameText "white"
+  terminalColorName "white"

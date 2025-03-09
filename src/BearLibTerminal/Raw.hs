@@ -13,6 +13,7 @@ import Data.ByteString ( ByteString )
 import qualified Data.ByteString as BS
 import Data.Text (Text)
 import qualified Data.Text.Foreign as TF
+import GHC.Generics
 
 data Dimensions = Dimensions
   { width :: Int
@@ -26,9 +27,13 @@ instance Storable Dimensions where
     pokeByteOff p 0 width
     pokeByteOff p 4 height
   peek p = do
-    width <- peekByteOff p 0
-    height <- peekByteOff p 4
-    return $ Dimensions width height
+    (width :: CUInt) <- peekByteOff p 0
+    (height :: CUInt) <- peekByteOff p 4
+    return $ Dimensions (fromIntegral width) (fromIntegral height)
+
+
+data PrintAlignment = AlignDefault | AlignLeft | AlignRight | AlignCenter | AlignTop | AlignBottom | AlignMiddle
+  deriving stock (Eq, Ord, Bounded, Enum, Generic, Show, Read)
 
 asBool :: CInt -> Bool
 asBool = (== 1)
@@ -47,6 +52,9 @@ textToCString f = liftIO . flip TF.withCString f
 
 stringToCString :: MonadIO m => (CString -> IO a) -> String -> m a
 stringToCString f = liftIO . flip withCString f
+
+surround :: Semigroup a => a -> a -> a -> a
+surround p s t = p <> t <> s
 
 foreign import capi safe "BearLibTerminal.h terminal_color" c_terminal_color_uint :: CUInt -> IO ()
 foreign import capi safe "BearLibTerminalExtras.h terminal_color_from_name" c_terminal_color_from_name :: CString -> IO ()

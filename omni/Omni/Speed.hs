@@ -14,9 +14,9 @@ import BearLibTerminal
 
 testSpeed :: IO ()
 testSpeed = do
-  terminalSetText "window.title='Omni: synchronous rendering"
+  terminalSet "window.title='Omni: synchronous rendering"
   terminalComposition CompositionOn
-  terminalSetText "output.vsync=false"
+  terminalSet "output.vsync=false"
   (s, r) <- setupSpeedDemo
   print s
   t <- nominalDiffTimeToSeconds <$> getPOSIXTime
@@ -35,17 +35,17 @@ shiftColor s =
                 -> Color (255 * ((f-0.66)/0.33)) 0 (255 * ((1.0-f)/0.33))
   in Color (min 255 (round r)) (min 255 (round r)) (min 255 (round r))
 
-highlightedColor :: Color Word8 -> CUInt
+highlightedColor :: Color Word8 -> Int
 highlightedColor (Color r g b) = fromByteString $ B.pack [255, r, g, b]
 
-dimmedColor :: Color Word8 -> CUInt
+dimmedColor :: Color Word8 -> Int
 dimmedColor (Color r g b) = fromByteString $ B.pack [255, r, g, b]
 
 fromByteString :: (Num a, Bits a) => B.ByteString -> a
 fromByteString = B.foldl go 0
     where go acc i = (acc  `shiftL` 8) .|. (fromIntegral i)
 
-setupSpeedDemo :: IO ([(CUInt{-, CUInt-})], [Int])
+setupSpeedDemo :: IO ([(Int{-, CUInt-})], [Int])
 setupSpeedDemo = do
   let shifted = map (\i -> let c = shiftColor i in (highlightedColor c, dimmedColor c)) [0..80]
   r0 <- mapM (const $ randomRIO (0, 255)) [(0 :: Int)..2000]
@@ -72,22 +72,22 @@ setupSpeedDemo = do
   int r0[2000];
   for (int i=0; i<2000; i++) r0[i] = rand()%256;
 -}
-runLoop :: (Int, Pico) -> Int -> Int -> V.Vector CUInt -> IO ()
+runLoop :: (Int, Pico) -> Int -> Int -> V.Vector Int -> IO ()
 runLoop (i, c) s s2 v = do
   terminalClear
   forM_ [0..25] $ \y ->
     forM_ [0..80] $ \x -> (do
       terminalColorUInt (v V.! ((s+x+y) `mod` 80))
       -- terminal_color(shifted_b[(shift_b+x+y)%80]);
-      terminalPut x y 0x2588
+      terminalPut x y '\x2588'
       terminalColorUInt $ ((v V.! ((s2+y-x) `mod` 80)) .&. 0x00FFFFFF) .|. 0x64000000
       -- terminal_color(color_from_another(100, shifted_b[(shift_f2+y-x)%80]));
-      terminalPut x y 0x2588
+      terminalPut x y '\x2588'
       let (d :: Float) = abs $ 40.0 - fromIntegral (s `mod` 80)
       terminalColorUInt (fromByteString $ B.pack [ min 255 (fromIntegral @Int $ round ((128.0*d)/40.0)), 255, 255, 255 ])
       -- int d = (int)std::fabs(40-(int)((shift_f)%80));
                         -- terminal_color(color_from_argb((int)(d/40.0f*128.0f), 255, 255, 255));
-      terminalPut x y (fromEnum '0'))
+      terminalPut x y ('0'))
       --terminalPut x y '0' + (r1+r0[y*80+x])%10);
   terminalRefresh
   t2 <- nominalDiffTimeToSeconds <$> getPOSIXTime
