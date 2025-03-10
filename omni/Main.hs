@@ -1,4 +1,6 @@
-module Main where
+module Main
+  ( main
+  ) where
 
 import BearLibTerminal
 import Control.Monad
@@ -6,6 +8,10 @@ import Control.Exception
 import Data.Text ( Text )
 import qualified Data.Text as T
 import Omni.BasicOutput
+import qualified Data.Map as M
+import Data.Maybe (fromMaybe)
+import Omni.DefaultFont (defaultFont)
+import BearLibTerminal.Keycodes
 
 main :: IO ()
 main = do
@@ -24,27 +30,20 @@ runLoop = do
   terminalRefresh
   c <- terminalRead
   case c of
-    Keypress TkEsc -> return ()
-    WindowEvent WindowClose -> return ()
-    Keypress Tk1 -> runUntilEsc basicOutput
-    x -> do
-      print x
-      runLoop
+    TkEscape ->return ()
+    TkClose -> return ()
+    x -> maybe runLoop (>> runLoop) (M.lookup x entryMap )
 
-runUntilEsc :: IO () -> IO ()
-runUntilEsc f = do
-  f
-  c <- terminalRead
-  case c of
-    WindowEvent WindowClose -> return ()
-    Keypress TkEsc -> runLoop
-    x -> do
-      print x
-      runUntilEsc f
+entryPresses :: [Keycode]
+entryPresses = [ Tk1 .. Tk9 ] <> [TkA .. TkK]
+
+entryMap :: M.Map Keycode (IO ())
+entryMap = M.fromList $ zip entryPresses (map snd entries)
+
 entries :: [(Text, IO ())]
 entries =
-  [ ("Basic output", return ())
-  , ("Default font", return ())
+  [ ("Basic output", basicOutput)
+  , ("Default font", defaultFont)
   , ("Tilesets", return ())
   , ("Sprites", return ())
   , ("Manual cellsize", return ())
@@ -68,13 +67,12 @@ entries =
 printEntry :: (Int, (Text, IO ())) -> IO ()
 printEntry (i, (n, _)) = do
   let shortcut = toEnum $ if i < 9 then fromEnum '1' + i else fromEnum 'a' + (i-9)
-  void $ terminalPrint 2 (1+i) (mconcat ["[color=orange]", T.singleton shortcut, ".[/color][color=gray]", n])
+  let col = if i `elem` [0..1] then "white" else "gray"
+  void $ terminalPrint 2 (1+i) (mconcat ["[color=orange]", T.singleton shortcut, ".[/color][color="<>col<>"]", n])
 
 printEntries :: IO ()
 printEntries = mapM_ printEntry (zip [0..] entries)
 
-alignRight :: Int
-alignRight = 2
 
 resetTerminal :: IO ()
 resetTerminal = do

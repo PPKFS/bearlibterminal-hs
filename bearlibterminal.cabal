@@ -67,8 +67,11 @@ executable omni
     , random
     , bearlibterminal
     , word8
+    , containers
+    , formatting
   hs-source-dirs:  omni
   main-is: Main.hs
   other-modules:
     Omni.Speed
     Omni.BasicOutput
+    Omni.DefaultFont

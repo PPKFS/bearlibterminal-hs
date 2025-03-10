@@ -72,7 +72,7 @@ terminalPrintCString ::
   -> Int -- ^ y-coordinate to start printing the string at.
   -> CString -- ^ the string to print.
   -> m Dimensions -- ^ the `Dimensions` of the string as printed on screen.
-terminalPrintCString x y c = liftIO $ alloca (\dim -> c_terminal_print_ptr (fromIntegral x) (fromIntegral y) c dim >> peek dim >>= \i -> print i >> pure i)
+terminalPrintCString x y c = liftIO $ alloca (\dim -> c_terminal_print_ptr (fromIntegral x) (fromIntegral y) c dim >> peek dim)
 
 -- | Print a string to the screen, given as a `CString`, with (optional) auto-wrapping and alignment.
 -- Wrapper around [@terminal_print_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#print_ext)

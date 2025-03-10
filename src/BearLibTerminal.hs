@@ -71,10 +71,7 @@ module BearLibTerminal
   , terminalCrop
   -- * Input
   -- ** Events
-  , Event(..)
   , Keycode(..)
-  , WindowEvent(..)
-  , intToKeycode
 
   , terminalPeek
   , terminalPeekCode
@@ -99,7 +96,6 @@ import Data.Function ((&))
 import Control.Monad.IO.Class
 
 import Foreign.C.String
-import Data.ByteString ( ByteString )
 import Data.Text (Text)
 import Foreign.C (CUInt)
 import Foreign.Marshal.Alloc
@@ -110,6 +106,7 @@ import BearLibTerminal.Terminal.Set
 import BearLibTerminal.Terminal.Color
 import BearLibTerminal.Terminal.Print
 import Data.Char (ord)
+import BearLibTerminal.Keycodes
 
 maxStringReadSizeInBytes :: Int
 maxStringReadSizeInBytes = 8192
@@ -297,14 +294,6 @@ terminalMeasureCString ::
   -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureCString c = liftIO $ alloca (\dim -> c_terminal_measure_ptr c dim >> peek dim)
 
--- | Measure the size of a string *if it were to be printed to the screen*, given as a `ByteString`.
--- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
-terminalMeasureBS ::
-  MonadIO m
-  => ByteString -- ^ the string to measure the print for.
-  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
-terminalMeasureBS = bsToCString terminalMeasureCString
-
 -- | Measure the size of a string *if it were to be printed to the screen*, given as a `String`.
 -- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
 terminalMeasureString ::
@@ -330,16 +319,6 @@ terminalMeasureExtCString ::
   -> CString  -- ^ the string to measure the print for.
   -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureExtCString w h c = liftIO $ alloca (\dim -> c_terminal_measure_ext_ptr (fromIntegral w) (fromIntegral h) c dim >> peek dim)
-
--- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `ByteString`.
--- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
-terminalMeasureExtBS ::
-  MonadIO m
-  => Int -- ^ the width of the bounding box.
-  -> Int -- ^ the height of the bounding box.
-  -> ByteString  -- ^ the string to measure the print for.
-  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
-terminalMeasureExtBS w h = bsToCString (terminalMeasureExtCString w h)
 
 -- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `Text`.
 -- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
@@ -412,54 +391,8 @@ terminalDelay ::
   -> m ()
 terminalDelay = liftIO . c_terminal_delay . fromIntegral
 
-data Event =
-  Keypress Keycode
-  | WindowEvent WindowEvent
-  deriving stock (Eq, Ord, Generic, Show)
+terminalRead :: MonadIO m => m Keycode
+terminalRead = Keycode <$> terminalReadCode
 
-data WindowEvent = Resize | WindowClose
-  deriving stock (Eq, Ord, Generic, Show, Bounded)
-
-data Keycode =
-  TkA | TkB | TkC | TkD | TkE | TkF | TkG | TkH | TkI | TkJ | TkK | TkL | TkM
-  | TkN | TkO | TkP | TkQ | TkR | TkS | TkT | TkU | TkV | TkW | TkX | TkY | TkZ
-  | Tk1 | Tk2 | Tk3 | Tk4 | Tk5 | Tk6 | Tk7 | Tk8 | Tk9 | Tk0
-  | TkEnter | TkEsc | TkBackspace | TkTab | TkSpace | TkMinus | TkEquals | TkLeftBracket
-  | TkRightBracket | TkBackslash | TkSemicolon | TkApostrophe | TkGrave | TkComma | TkPeriod | TkSlash
-  | Tk0x39 -- this seems to be missing from BLT, but adding it as a dummy makes the enum instance easier
-  | TkF1 | TkF2 | TkF3 | TkF4 | TkF5 | TkF6 | TkF7 | TkF8 | TkF9 | TkF10
-  | TkF11 | TkF12 | Tk0x46 | Tk0x47 | TkPause | TkInsert | TkHome | TkPageUp | TkDelete | TkPageDown
-  | TkRight | TkLeft | TkDown | TkUp
-  | Tk0x53 -- see also, Tk0x39
-  | TkKPDivide | TkKPMultiply | TkKPMinus | TkKPPlus
-  | TkKPEnter | TkKP1 | TkKP2 | TkKP3 | TkKP4 | TkKP5 | TkKP6 | TkKP7 | TkKP8 | TkKP9 | TkKP0
-  -- there's a gap of 7 here
-  | TkKPPeriod | TkShift | TkControl | TkAlt
-  deriving stock (Eq, Ord, Generic, Show, Bounded, Enum)
-
-safeToEnum :: forall t . (Enum t, Bounded t) => Int -> Maybe t
-safeToEnum i =
-  if (i >= fromEnum (minBound :: t)) && (i <= fromEnum (maxBound :: t))
-    then Just . toEnum $ i
-    else Nothing
-
-intToKeycode :: Int -> Keycode
-intToKeycode = \case
-  0x70 -> TkShift
-  0x71 -> TkControl
-  0x72 -> TkAlt
-  i -> (safeToEnum . (\x -> x - 4) $ i) & \case
-    Nothing -> error $ "unknown keycode: " <> show i
-    Just w -> w
-
-terminalRead :: MonadIO m => m Event
-terminalRead = codeToEvent <$> terminalReadCode
-
-terminalPeek :: MonadIO m => m Event
-terminalPeek = codeToEvent <$> terminalPeekCode
-
-codeToEvent :: Int -> Event
-codeToEvent = \case
-    225 -> WindowEvent Resize
-    224 -> WindowEvent WindowClose
-    ikc -> Keypress . intToKeycode $ ikc
+terminalPeek :: MonadIO m => m Keycode
+terminalPeek = Keycode <$> terminalPeekCode

@@ -7,6 +7,8 @@ module BearLibTerminal.Terminal.Set
   , terminalSetCString_
 
   , terminalSetTitle
+  , terminalSetMany
+  , titleProperty
 
   ) where
 
@@ -16,6 +18,8 @@ import Control.Monad.IO.Class
 import Data.Text (Text)
 import BearLibTerminal.Terminal.CString
 import BearLibTerminal.Terminal.String
+import qualified Data.Text as T
+import Data.String (IsString)
 
 -- | Set one or more of the configuration options, given as a `Text`.
 --
@@ -37,4 +41,14 @@ terminalSet_ ::
 terminalSet_ = textToCString terminalSetCString_
 
 terminalSetTitle :: MonadIO m => Text -> m ()
-terminalSetTitle = terminalSet_ . surround "window: title='" "'"
+terminalSetTitle = terminalSet_ . ("window: " <>) . titleProperty
+
+titleProperty :: IsString a => Semigroup a => a -> a
+titleProperty = surround "title='" "'"
+
+terminalSetMany ::
+  MonadIO m
+  => Text
+  -> [Text]
+  -> m ()
+terminalSetMany super rest = terminalSet_ $ super <> ": " <> T.intercalate ", " rest

@@ -9,8 +9,6 @@ import Foreign.C.String
 import Foreign.Ptr
 import Foreign.Storable
 import Control.Monad.IO.Class
-import Data.ByteString ( ByteString )
-import qualified Data.ByteString as BS
 import Data.Text (Text)
 import qualified Data.Text.Foreign as TF
 import GHC.Generics
@@ -43,9 +41,6 @@ foreign import capi safe "BearLibTerminal.h terminal_open" c_terminal_open :: IO
 foreign import capi safe "BearLibTerminal.h terminal_close" c_terminal_close :: IO ()
 
 foreign import capi safe "BearLibTerminal.h terminal_set" c_terminal_set :: CString -> IO CInt
-
-bsToCString :: MonadIO m => (CString -> IO a) -> ByteString -> m a
-bsToCString f = liftIO . flip BS.useAsCString f
 
 textToCString :: MonadIO m => (CString -> IO a) -> Text -> m a
 textToCString f = liftIO . flip TF.withCString f
