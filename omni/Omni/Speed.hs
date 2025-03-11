@@ -1,9 +1,7 @@
 module Omni.Speed (testSpeed) where
-import BearLibTerminal.Raw
 import Control.Monad
 import System.Random
 import Data.Word8
-import Foreign.C.Types
 import qualified Data.ByteString as B
 import Data.Bits
 import qualified Data.Vector as V
