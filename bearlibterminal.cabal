@@ -75,3 +75,5 @@ executable omni
     Omni.Speed
     Omni.BasicOutput
     Omni.DefaultFont
+    Omni.Tilesets
+    Omni.Sprites

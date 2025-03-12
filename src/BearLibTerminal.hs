@@ -9,7 +9,6 @@ module BearLibTerminal
 
     - `Text` (strongly preferred)
     - `String`
-    - `ByteString`
     - `CString` (avoid unless you want to do memory management and marshalling yourself)
 
   As this library is a low-level wrapper, the original BearLibTerminal documentation is an excellent reference!

@@ -338,7 +338,7 @@ pattern TkMouseClicks= Keycode 0x8C
  * b) released 'A' :: 0x04|VK_KEY_RELEASED == Keycode 0x104
 -}
 pattern TkKeyReleased :: Keycode
-pattern TkKeyReleased= Keycode 0x100
+pattern TkKeyReleased = Keycode 0x100
 
 {-
  * Virtual key-codes for internal terminal states/variables.

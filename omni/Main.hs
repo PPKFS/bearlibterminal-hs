@@ -11,6 +11,7 @@ import Omni.BasicOutput
 import qualified Data.Map as M
 import Omni.DefaultFont (defaultFont)
 import BearLibTerminal.Keycodes
+import Omni.Tilesets
 
 main :: IO ()
 main = do
@@ -43,7 +44,7 @@ entries :: [(Text, IO ())]
 entries =
   [ ("Basic output", basicOutput)
   , ("Default font", defaultFont)
-  , ("Tilesets", return ())
+  , ("Tilesets", tilesets)
   , ("Sprites", return ())
   , ("Manual cellsize", manualCellsize)
   , ("Auto-generated tileset", return ())
