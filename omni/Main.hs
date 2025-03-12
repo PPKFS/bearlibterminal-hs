@@ -45,7 +45,7 @@ entries =
   , ("Default font", defaultFont)
   , ("Tilesets", return ())
   , ("Sprites", return ())
-  , ("Manual cellsize", return ())
+  , ("Manual cellsize", manualCellsize)
   , ("Auto-generated tileset", return ())
   , ("Multiple fonts", return ())
   , ("Text alignment", return ())
