@@ -30,7 +30,7 @@ common common-options
   ghc-options:
     -Wall -Wcompat -Widentities -Wredundant-constraints
     -Wno-unused-packages -Wno-deprecations -fhide-source-paths
-    -Wno-unused-top-binds -Wmissing-deriving-strategies
+    -Wno-unused-top-binds -Wmissing-deriving-strategies -haddock
 
   default-language: GHC2021
   default-extensions:

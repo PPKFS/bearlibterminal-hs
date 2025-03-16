@@ -5,7 +5,7 @@ License     : MIT
 Stability   : experimental
 Portability : POSIX
 
-  A low-ish level binding to BearLibTerminal. For the most part this is 1-to-1 to the original C/C++ API
+A low-ish level binding to BearLibTerminal. For the most part this is 1-to-1 to the original C/C++ API
     and the raw bindings in `BearLibTerminal.Raw` are almost identical (the only differences being that intcode
     return types are wrapped into Booleans where relevant).
   For functions that expect strings, 3 variants exist:

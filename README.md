@@ -1,3 +1,5 @@
+![Hackage Version](https://img.shields.io/hackage/v/bearlibterminal)
+
 # bearlibterminal-hs
 
 Low-level Haskell bindings to the [BearLibTerminal](http://foo.wyrd.name/en:bearlibterminal) graphics library, primarily for roguelike games.
@@ -28,3 +30,8 @@ Other notes:
 ## This is a bit too low level for me...
 
 Check out the Haskell roguelike toolkit library [roguefunctor](https://github.com/ppkfs/roguefunctor), which is the high-level, opinionated wrapper around this library with nicer abstractions for positions, colours, config options, event handling, rendering, and so forth.
+
+# Screenshots from the Omni demo
+
+![screenshot](./Media/tilesets.png)
+![screenshot](./Media/fontsize.png)
