@@ -1,15 +1,10 @@
 cabal-version: 3.6
 name:          bearlibterminal
-version:       0.1.0.0
+version:       0.1.0.1
 synopsis:      Low-level Haskell bindings to the BearLibTerminal graphics library.
 description:
-  A Haskell wrapper for a graphics library for making roguelike-style games.
-  From the [BearLibTerminal documentation](http://foo.wyrd.name/en:bearlibterminal):
-    BearLibTerminal is a library that creates a terminal-like window facilitating flexible textual output and uncomplicated input processing.
-    A lot of roguelike games intentionally use aesthetic textual or pseudographic visual style. However, native output via the command line
-    interface usually has a few annoying shortcomings such as low speed or palette and font restrictions.
-    Using an extended character set (several languages at once or complicated pseudographics) may also be tricky. BearLibTerminal solves
-    that by providing its own window with a grid of character cells and simple yet powerful API for configuration and textual output.
+  A Haskell wrapper for a graphics library for making roguelike-style games, with a terminal-like window facilitating flexible textual output and
+  uncomplicated input processing. For more information and a design overview, please see the original documentation here: http://foo.wyrd.name/en:bearlibterminal.
 
 homepage:      https://github.com/PPKFS/bearlibterminal-hs
 bug-reports:   https://github.com/PPKFS/bearlibterminal-hs/issues

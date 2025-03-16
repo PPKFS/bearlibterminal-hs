@@ -4,6 +4,8 @@ Low-level Haskell bindings to the [BearLibTerminal](http://foo.wyrd.name/en:bear
 
 ## Description
 
+The design overview of the original library is excellent to get an understanding of how things work: http://foo.wyrd.name/en:bearlibterminal:design.
+
 ## Getting Started
 
 ### Installing
