@@ -1,11 +1,8 @@
 module Omni.BasicOutput where
 import BearLibTerminal.Terminal.Set
 import BearLibTerminal
-import BearLibTerminal.Terminal.Print
 import Control.Monad (forM_)
-import BearLibTerminal.Terminal.Color ( colorFromARGB )
 import Data.Text as T hiding (zip)
-import BearLibTerminal.Keycodes
 
 orangeText :: Text -> Text
 orangeText = textColor "orange"
@@ -24,7 +21,7 @@ basicOutput = do
         factor = fromIntegral i / fromIntegral n
         red = round @_ @Int $ (1.0 - factor) * 255
         green = round $ factor * 255
-    terminalColorUInt (colorFromARGB 0xFF red green 0)
+    terminalColorUInt (colorFromRGB red green 0)
     terminalPut (2+n+i) 1 c
 
   terminalColorName "white"

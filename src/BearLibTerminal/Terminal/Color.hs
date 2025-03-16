@@ -1,4 +1,21 @@
-module BearLibTerminal.Terminal.Color where
+{-|
+Module      : BearLibTerminal.Terminal.Color
+Description : Color functions.
+License     : MIT
+Stability   : experimental
+Portability : POSIX
+
+Setting the active foreground/background colors and a couple of helper functions for making colors from (A)RGB quads/triples.
+-}
+
+module BearLibTerminal.Terminal.Color
+  ( colorFromARGB
+  , colorFromRGB
+  , terminalColorUInt
+  , terminalColorName
+  , terminalBkColorUInt
+  , terminalBkColorName
+  ) where
 
 import Control.Monad.IO.Class
 import Data.Text
@@ -6,14 +23,25 @@ import BearLibTerminal.Raw
 import BearLibTerminal.Terminal.CString
 import Data.Bits
 
+-- | Convert a color given as 4 integer values (0-255) into an unsigned integer for use with `terminalColorUInt`. No bounds checking is performed.
 colorFromARGB ::
   Integral a
-  => a
-  -> a
-  -> a
-  -> a
-  -> Int
+  => a -- ^ alpha channel value.
+  -> a -- ^ red channel value.
+  -> a -- ^ green channel value.
+  -> a -- ^ blue channel value.
+  -> Int -- ^ color in 32-bit integer form.
 colorFromARGB a r g b = (fromIntegral a `shiftL` 24) .|. (fromIntegral r `shiftL` 16) .|. (fromIntegral g `shiftL` 8) .|. fromIntegral b
+
+-- | Convert a color given as 3 integer values (0-255) into an unsigned integer for use with `terminalColorUInt`. No bounds checking is performed.
+-- The alpha channel is fully opaque (0xFF).
+colorFromRGB ::
+  Integral a
+  => a -- ^ red channel value.
+  -> a -- ^ green channel value.
+  -> a -- ^ blue channel value.
+  -> Int -- ^ color in 32-bit integer form.
+colorFromRGB = colorFromARGB 255
 
 -- | Set the currently selected foreground color to be used by following output functions (e.g. print).
 -- Takes a color as a 32-bit unsigned integer in ARGB format.

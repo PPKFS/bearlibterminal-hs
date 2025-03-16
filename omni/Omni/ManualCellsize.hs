@@ -1,9 +1,6 @@
 module Omni.ManualCellsize where
 
 import BearLibTerminal
-import BearLibTerminal.Keycodes
-import BearLibTerminal.Terminal.Print
-import BearLibTerminal.Terminal.String
 import Control.Monad (when)
 import Control.Monad.State
 import Data.Functor (void)

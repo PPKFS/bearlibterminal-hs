@@ -1,1 +1,0 @@
-module Omni.Sprites where

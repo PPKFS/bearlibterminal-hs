@@ -1,3 +1,13 @@
+{-|
+Module      : BearLibTerminal.Raw
+Description : Raw bindings to the BearLibTerminal C graphics library.
+License     : MIT
+Stability   : experimental
+Portability : POSIX
+
+These are the raw bindings to the C library. Not recommended to use them unless you really want to.
+-}
+
 {-# LANGUAGE CApiFFI #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DuplicateRecordFields #-}
@@ -13,10 +23,11 @@ import Data.Text (Text)
 import qualified Data.Text.Foreign as TF
 import GHC.Generics
 
+-- | A 2D vector representing the dimensions of a string when printed to the screen (optionally with some auto string-wrapping).
 data Dimensions = Dimensions
   { width :: Int
   , height :: Int
-  } deriving stock (Show)
+  } deriving stock (Show, Generic, Eq, Ord, Read)
 
 instance Storable Dimensions where
   sizeOf _ = 8
@@ -29,10 +40,11 @@ instance Storable Dimensions where
     (height :: CUInt) <- peekByteOff p 4
     return $ Dimensions (fromIntegral width) (fromIntegral height)
 
-
+-- | Alignment of glyphs within a cell. Primarily useful for alignment of multi-cell characters.
 data PrintAlignment = AlignDefault | AlignLeft | AlignRight | AlignCenter | AlignTop | AlignBottom | AlignMiddle
   deriving stock (Eq, Ord, Bounded, Enum, Generic, Show, Read)
 
+-- | Wrap a C TRUE return value into a Haskell boolean.
 asBool :: CInt -> Bool
 asBool = (== 1)
 
@@ -48,6 +60,7 @@ textToCString f = liftIO . flip TF.withCString f
 stringToCString :: MonadIO m => (CString -> IO a) -> String -> m a
 stringToCString f = liftIO . flip withCString f
 
+-- | prepend and amend semigroups.
 surround :: Semigroup a => a -> a -> a -> a
 surround p s t = p <> t <> s
 

@@ -10,7 +10,6 @@ import qualified Data.Text as T
 import Omni.BasicOutput
 import qualified Data.Map as M
 import Omni.DefaultFont (defaultFont)
-import BearLibTerminal.Keycodes
 import Omni.Tilesets
 import Omni.ManualCellsize
 
@@ -46,29 +45,29 @@ entries =
   [ ("Basic output", basicOutput)
   , ("Default font", defaultFont)
   , ("Tilesets", tilesets)
-  , ("Sprites", return ())
+  , ("Sprites", return ()) -- TODO
   , ("Manual cellsize", manualCellsize)
-  , ("Auto-generated tileset", return ())
-  , ("Multiple fonts", return ())
-  , ("Text alignment", return ())
-  , ("Formatted log", return ())
-  , ("Layers", return ())
-  , ("Extended 1: basics", return ())
-  , ("Extended 2: smooth scroll", return ())
-  , ("Dynamic sprites", return ())
-  , ("Speed", return ())
-  , ("Input 1: keyboard", return ())
-  , ("Input 2: mouse", return ())
-  , ("Input 3: text input", return ())
-  , ("Input 4: filtering", return ())
-  , ("Window resizing", return ())
-  , ("Examining cell contents", return ())
+  , ("Auto-generated tileset", return ())  -- TODO
+  , ("Multiple fonts", return ())  -- TODO
+  , ("Text alignment", return ())  -- TODO
+  , ("Formatted log", return ()) -- TODO
+  , ("Layers", return ()) -- TODO
+  , ("Extended 1: basics", return ()) -- TODO
+  , ("Extended 2: smooth scroll", return ()) -- TODO
+  , ("Dynamic sprites", return ()) -- TODO
+  , ("Speed", return ()) -- TODO
+  , ("Input 1: keyboard", return ()) -- TODO
+  , ("Input 2: mouse", return ()) -- TODO
+  , ("Input 3: text input", return ()) -- TODO
+  , ("Input 4: filtering", return ()) -- TODO
+  , ("Window resizing", return ()) -- TODO
+  , ("Examining cell contents", return ()) -- TODO
   ]
 
 printEntry :: (Int, (Text, IO ())) -> IO ()
 printEntry (i, (n, _)) = do
   let shortcut = toEnum $ if i < 9 then fromEnum '1' + i else fromEnum 'a' + (i-9)
-  let col = if i `elem` [0..1] then "white" else "gray"
+  let col = if i `elem` ([0..2] <> [4]) then "white" else "gray"
   void $ terminalPrint 2 (1+i) (mconcat ["[color=orange]", T.singleton shortcut, ".[/color][color="<>col<>"]", n])
 
 printEntries :: IO ()

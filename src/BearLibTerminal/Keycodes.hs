@@ -1,11 +1,30 @@
+{-|
+Module      : BearLibTerminal.Keycodes
+Description : Keycodes and events.
+License     : MIT
+Stability   : experimental
+Portability : POSIX
+
+All events and keycodes that can be received by polling or queried for in the window state.
+-}
+
 {-# LANGUAGE PatternSynonyms #-}
 
 module BearLibTerminal.Keycodes where
 
 import GHC.Generics
 
+-- | Events and states are defined in the original library as integer constants, which are all called keycodes. This is a very liberal
+-- use of a "virtual keycode", because many of them are not keys.
+-- These are defined as bidirectional pattern synonyms so that they still can be treated as bitwise operable (e.g. checking for key release
+-- events).
+-- These are used for:
+-- - `BearLibTerminal.terminalRead` - polling for events (key presses, key releases, window events, mouse movements)
+-- - `BearLibTerminal.terminalState` and `BearLibTerminal.terminalKeyState` - for querying current window state (e.g. mouse position) and
+-- the status of whether keys are currently pressed respectively.
+-- For full reference of the input queue, see http://foo.wyrd.name/en:bearlibterminal:reference:input.
 newtype Keycode = Keycode Int
-  deriving newtype (Eq, Ord, Show, Enum, Bounded)
+  deriving newtype (Eq, Ord, Show, Enum, Bounded, Num, Real, Integral)
   deriving stock (Generic)
 
 pattern TkA :: Keycode

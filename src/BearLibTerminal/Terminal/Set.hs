@@ -1,25 +1,30 @@
+{-|
+Module      : BearLibTerminal.Terminal.Set
+Description : Setting configuration options.
+License     : MIT
+Stability   : experimental
+Portability : POSIX
+
+Setting configuration options - e.g. cell size, fonts, window title, etc etc etc. A full list of everything settable is at
+http://foo.wyrd.name/en:bearlibterminal:reference:configuration.
+
+There are some helper functions specifically for setting a title, but it is recommended to use a @printf@ style package
+to build longer configuration strings.
+-}
+
 module BearLibTerminal.Terminal.Set
   ( terminalSet
-  , terminalSetString
-  , terminalSetCString
   , terminalSet_
-  , terminalSetString_
-  , terminalSetCString_
 
   , terminalSetTitle
   , terminalSetMany
-  , titleProperty
-
   ) where
 
 import BearLibTerminal.Raw
-import Control.Monad.IO.Class
-
-import Data.Text (Text)
 import BearLibTerminal.Terminal.CString
-import BearLibTerminal.Terminal.String
+import Control.Monad.IO.Class
+import Data.Text (Text)
 import qualified Data.Text as T
-import Data.String (IsString)
 
 -- | Set one or more of the configuration options, given as a `Text`.
 --
@@ -40,15 +45,14 @@ terminalSet_ ::
   -> m ()
 terminalSet_ = textToCString terminalSetCString_
 
+-- | Set the title of the window.
 terminalSetTitle :: MonadIO m => Text -> m ()
-terminalSetTitle = terminalSet_ . ("window: " <>) . titleProperty
+terminalSetTitle = terminalSet_ . ("window: " <>) . surround "title='" "'"
 
-titleProperty :: IsString a => Semigroup a => a -> a
-titleProperty = surround "title='" "'"
-
+-- | Set multiple properties at once under a specific super-heading.
 terminalSetMany ::
   MonadIO m
-  => Text
-  -> [Text]
+  => Text -- ^ the super-heading to set things under (e.g. `window`)
+  -> [Text] -- ^ the list of key:value properties to be set.
   -> m ()
 terminalSetMany super rest = terminalSet_ $ super <> ": " <> T.intercalate ", " rest

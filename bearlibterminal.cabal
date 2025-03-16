@@ -8,7 +8,7 @@ bug-reports:   https://github.com/PPKFS/bearlibterminal-hs/issues
 license:       MIT
 author:        Avery
 maintainer:    Avery <ppkfs@outlook.com>
-copyright:     2024 Avery
+copyright:     2024-2025 Avery
 category:      Game Development
 build-type:    Simple
 tested-with:   GHC == 9.8.2
@@ -72,9 +72,7 @@ executable omni
   hs-source-dirs:  omni
   main-is: Main.hs
   other-modules:
-    Omni.Speed
     Omni.BasicOutput
     Omni.DefaultFont
     Omni.Tilesets
-    Omni.Sprites
     Omni.ManualCellsize

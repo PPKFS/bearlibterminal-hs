@@ -1,4 +1,22 @@
-module BearLibTerminal.Terminal.Print where
+{-|
+Module      : BearLibTerminal.Terminal.Print
+Description : Printing text.
+License     : MIT
+Stability   : experimental
+Portability : POSIX
+
+Functions for printing text to the screen (given as `Data.Text.Text`), and a couple of helper functions for wrapping
+strings with inline color strings.
+-}
+
+module BearLibTerminal.Terminal.Print
+  ( textColor
+  , textBkColor
+  , terminalPrint
+  , terminalPrint_
+  , terminalPrintExt
+  , terminalPrintExt_
+  ) where
 
 import BearLibTerminal.Raw
 import Control.Monad.IO.Class
@@ -8,19 +26,21 @@ import BearLibTerminal.Terminal.CString
 import Data.String (IsString)
 import Control.Monad (void)
 
+-- | Wrap a string (in any `IsString` format) with color formatting tags.
 textColor ::
   IsString a
   => Semigroup a
-  => a
-  -> a
+  => a -- ^ the color, from the list of valid color identifiers - http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name.
+  -> a -- ^ the text to wrap.
   -> a
 textColor col = surround ("[color="<>col<>"]") "[/color]"
 
+-- | Wrap a string (in any `IsString` format) with background color formatting tags.
 textBkColor ::
   IsString a
   => Semigroup a
-  => a
-  -> a
+  => a -- ^ the background color, from the list of valid color identifiers - http://foo.wyrd.name/en:bearlibterminal:reference#color_from_name.
+  -> a -- ^ the text to wrap.
   -> a
 textBkColor col = surround ("[bkcolor="<>col<>"]") "[/bkcolor]"
 

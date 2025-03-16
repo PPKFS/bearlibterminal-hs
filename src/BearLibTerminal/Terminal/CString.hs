@@ -1,3 +1,14 @@
+{-|
+Module      : BearLibTerminal.Terminal.CString
+Description : String functions taking `CString`s.
+License     : MIT
+Stability   : experimental
+Portability : POSIX
+
+Functions that take strings as `CString`s. Unless you are wanting to marshall across the foreign boundary yourself,
+you probably don't want to use these (prefer `Data.Text.Text` from `BearLibTerminal` or `String` from `BearLibTerminal.Terminal.String`).
+-}
+
 module BearLibTerminal.Terminal.CString
   ( terminalSetCString
   , terminalSetCString_
@@ -7,15 +18,18 @@ module BearLibTerminal.Terminal.CString
   , terminalPrintCString
   , terminalPrintExtCString
 
+  , terminalMeasureCString
+  , terminalMeasureExtCString
+
   ) where
 
 import BearLibTerminal.Raw
 import Control.Monad.IO.Class
-import Foreign.C.String
-import Foreign
-import Foreign.C.Types (CInt)
-import Data.Maybe (fromMaybe)
 import Data.Function ((&))
+import Data.Maybe (fromMaybe)
+import Foreign
+import Foreign.C.String
+import Foreign.C.Types (CInt)
 
 -- | Set one or more of the configuration options, given as a `CString`.
 --
@@ -97,3 +111,21 @@ terminalPrintExtCString x y w h mbAlign c =
         AlignMiddle -> 12
   in
   liftIO $ alloca (\dim -> c_terminal_print_ext_ptr (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h) align c dim >> peek dim)
+
+-- | Measure the size of a string *if it were to be printed to the screen*, given as a `CString`.
+-- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureCString ::
+  MonadIO m
+  => CString -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
+terminalMeasureCString c = liftIO $ alloca (\dim -> c_terminal_measure_ptr c dim >> peek dim)
+
+-- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `CString`.
+-- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
+terminalMeasureExtCString ::
+  MonadIO m
+  => Int -- ^ the width of the bounding box.
+  -> Int -- ^ the height of the bounding box.
+  -> CString  -- ^ the string to measure the print for.
+  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
+terminalMeasureExtCString w h c = liftIO $ alloca (\dim -> c_terminal_measure_ext_ptr (fromIntegral w) (fromIntegral h) c dim >> peek dim)

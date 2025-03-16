@@ -1,9 +1,7 @@
 module Omni.Tilesets where
 
 import BearLibTerminal
-import BearLibTerminal.Terminal.Print
 import Control.Monad
-import BearLibTerminal.Keycodes
 
 tilesets :: IO ()
 tilesets = do

@@ -1,19 +1,27 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-|
+Module      : BearLibTerminal.Keycodes
+Description : String functions taking `CString`s.
+License     : MIT
+Stability   : experimental
+Portability : POSIX
 
-module BearLibTerminal
-  (
-  {- | A low-ish level binding to BearLibTerminal. For the most part this is 1-to-1 to the original C/C++ API
+  A low-ish level binding to BearLibTerminal. For the most part this is 1-to-1 to the original C/C++ API
     and the raw bindings in `BearLibTerminal.Raw` are almost identical (the only differences being that intcode
     return types are wrapped into Booleans where relevant).
-  For functions that expect strings, 4 variants exist:
+  For functions that expect strings, 3 variants exist:
 
-    - `Text` (strongly preferred)
-    - `String`
-    - `CString` (avoid unless you want to do memory management and marshalling yourself)
+    - `Text`. This one is strongly preferred because of the performance benefits of `Text` over `String`. These versions
+    are available without a suffix - e.g. `terminalSet`, `terminalPrint_`.
+    - `String`. Available with a `String` suffix - e.g. `terminalSetString`, `terminalPrintString_`.
+    - `CString`. These aren't exported from this module but are available in `BearLibTerminal.Terminal.CString` if you
+      do need them. They also do not have `m ()` variants.
 
   As this library is a low-level wrapper, the original BearLibTerminal documentation is an excellent reference!
   http://foo.wyrd.name/en:bearlibterminal:reference
-  -}
+-}
+
+module BearLibTerminal
+  (
   -- * Initialisation and configuration
   -- ** Open
   -- | For initialising a BearLibTerminal instance and opening a window.
@@ -24,22 +32,28 @@ module BearLibTerminal
   -- ** Set
 
   -- | For setting configuration options via configuration strings.
-  , terminalSet, terminalSetString, terminalSetCString
-  , terminalSet_, terminalSetString_, terminalSetCString_
+  , terminalSet, terminalSetString
+  , terminalSet_, terminalSetString_
   -- * Output state
-  -- ** Color
-  -- *** Foreground
 
+  -- ** Color
+  , colorFromARGB
+  , colorFromRGB
+  -- *** Foreground
   , terminalColorUInt
   , terminalColorName
+  , terminalColorNameString
   -- *** Background
   , terminalBkColorUInt
   , terminalBkColorName
+  , terminalBkColorNameString
+
   -- ** Composition
   , TerminalCompositionMode(..)
   , terminalComposition
   -- ** Layer
   , terminalLayer
+
   -- * Output
   -- ** Print
 
@@ -49,18 +63,28 @@ module BearLibTerminal
   -- [@terminal_print@](http://foo.wyrd.name/en:bearlibterminal:reference#print).
   , PrintAlignment(..)
   , Dimensions(..)
+  , textColor
+  , textBkColor
   , terminalPrint
+  , terminalPrint_
   , terminalPrintExt
+  , terminalPrintExt_
+
+  , terminalPrintString
+  , terminalPrintString_
+  , terminalPrintExtString
+  , terminalPrintExtString_
+
+  -- ** Put
   , terminalPut
   , terminalPutInt
   , terminalPutExt
+
   -- ** Measure
   , terminalMeasureText
   , terminalMeasureString
-  , terminalMeasureCString
   , terminalMeasureExtText
   , terminalMeasureExtString
-  , terminalMeasureExtCString
 
   -- ** Refresh
   , terminalRefresh
@@ -70,6 +94,7 @@ module BearLibTerminal
   , terminalCrop
   -- * Input
   -- ** Events
+  , module BearLibTerminal.Keycodes
   , Keycode(..)
 
   , terminalPeek
@@ -81,33 +106,32 @@ module BearLibTerminal
   , terminalReadString
   -- ** State
   , terminalState
+  , terminalKeyState
   -- ** Picking
   , terminalPick
   , terminalPickColor
-  , terminalKeyState
-
   -- * Utility
   , terminalDelay
   ) where
 
-import BearLibTerminal.Raw
-import GHC.Generics
-import Control.Monad.IO.Class
 
-import Foreign.C.String
-import Data.Text (Text)
-import Foreign.C (CUInt)
-import Foreign.Marshal.Alloc
-import qualified Data.Text.Foreign as T
-import Foreign
-import Control.Exception
-import BearLibTerminal.Terminal.Set
+
+import BearLibTerminal.Keycodes
+import BearLibTerminal.Raw
+import BearLibTerminal.Terminal.CString
 import BearLibTerminal.Terminal.Color
 import BearLibTerminal.Terminal.Print
+import BearLibTerminal.Terminal.Set
+import BearLibTerminal.Terminal.String
+import Control.Exception
+import Control.Monad.IO.Class
 import Data.Char (ord)
-import BearLibTerminal.Keycodes
 import Data.Coerce (coerce)
-
+import Data.Text (Text)
+import Foreign
+import Foreign.C (CUInt)
+import GHC.Generics
+import qualified Data.Text.Foreign as T
 maxStringReadSizeInBytes :: Int
 maxStringReadSizeInBytes = 8192
 
@@ -286,22 +310,6 @@ terminalPutExt x y dx dy code mbColors = liftIO $ colorsToArr $ c_terminal_put_e
       Nothing -> f nullPtr
       Just (tl, bl, br, tr) -> withArray (map fromIntegral [tl, bl, br, tr]) f
 
--- | Measure the size of a string *if it were to be printed to the screen*, given as a `CString`.
--- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
-terminalMeasureCString ::
-  MonadIO m
-  => CString -- ^ the string to measure the print for.
-  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
-terminalMeasureCString c = liftIO $ alloca (\dim -> c_terminal_measure_ptr c dim >> peek dim)
-
--- | Measure the size of a string *if it were to be printed to the screen*, given as a `String`.
--- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
-terminalMeasureString ::
-  MonadIO m
-  => String -- ^ the string to measure the print for.
-  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
-terminalMeasureString = stringToCString terminalMeasureCString
-
 -- | Measure the size of a string *if it were to be printed to the screen*, given as a `Text`.
 -- Wrapper around [@terminal_measure@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
 terminalMeasureText ::
@@ -309,16 +317,6 @@ terminalMeasureText ::
   => Text -- ^ the string to measure the print for.
   -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureText = textToCString terminalMeasureCString
-
--- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `CString`.
--- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
-terminalMeasureExtCString ::
-  MonadIO m
-  => Int -- ^ the width of the bounding box.
-  -> Int -- ^ the height of the bounding box.
-  -> CString  -- ^ the string to measure the print for.
-  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
-terminalMeasureExtCString w h c = liftIO $ alloca (\dim -> c_terminal_measure_ext_ptr (fromIntegral w) (fromIntegral h) c dim >> peek dim)
 
 -- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `Text`.
 -- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
@@ -330,18 +328,11 @@ terminalMeasureExtText ::
   -> m Dimensions -- ^ the size of the string if it were printed to the screen.
 terminalMeasureExtText w h = textToCString (terminalMeasureExtCString w h)
 
--- | Measure the size of a string *if it were to be printed to the screen*, autowrapped in a bounding box, given as a `String`.
--- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#measure)
-terminalMeasureExtString ::
-  MonadIO m
-  => Int -- ^ the width of the bounding box.
-  -> Int -- ^ the height of the bounding box.
-  -> String  -- ^ the string to measure the print for.
-  -> m Dimensions -- ^ the size of the string if it were printed to the screen.
-terminalMeasureExtString w h = stringToCString (terminalMeasureExtCString w h)
-
--- TODO TODO TODO
-terminalState :: MonadIO m => Int -> m Int
+-- | This function queries the current numeric value of a library property; e.g. mouse position or clicks, or key presses/releases.
+-- When looking to query for key presses or releases, `terminalKeyState` provides a better interface.
+-- Wrapper around [@terminal_state@]. For more information, check the table in the original documentation:
+-- http://foo.wyrd.name/en:bearlibterminal:reference:input#event_and_state_constants
+terminalState :: MonadIO m => Keycode -> m Int
 terminalState = liftIO . fmap fromIntegral . c_terminal_state . fromIntegral
 
 -- | Returns true if there are currently input events in the input queue.
@@ -351,11 +342,18 @@ terminalHasInput ::
   => m Bool -- ^ if there are currently input events in the input queue.
 terminalHasInput = liftIO $ asBool <$> c_terminal_has_input
 
--- TODO
+-- | Read an event from the input queue and remove it. If there are no pending events in the input queue, block
+-- until there is. If you don't want to block until an event comes, check for input with `terminalHasInput` first.
+-- This will return a raw integer - prefer `terminalPeek` to be able to use the pattern synonyms of named keycodes.
+-- Wrapper around [@terminal_read@](http://foo.wyrd.name/en:bearlibterminal:reference#read).
+-- For more information on the input queue, see the original documentation: http://foo.wyrd.name/en:bearlibterminal:reference:input#input_queue
 terminalReadCode :: MonadIO m => m Int
 terminalReadCode = liftIO $ fromIntegral <$> c_terminal_read
 
--- TODO
+-- | Read an event from the input queue but **do not** remove it. If there are no pending events in the input queue, this will return `Nothing`.
+-- This is non-blocking. This will return a raw integer - prefer `terminalPeek` to be able to use the pattern synonyms of named keycodes.
+-- Wrapper around [@terminal_peek@](http://foo.wyrd.name/en:bearlibterminal:reference#peek).
+-- For more information on the input queue, see the original documentation: http://foo.wyrd.name/en:bearlibterminal:reference:input#input_queue
 terminalPeekCode :: MonadIO m => m Int
 terminalPeekCode = liftIO $ fromIntegral <$> c_terminal_peek
 
@@ -378,10 +376,7 @@ terminalReadString x y m = liftIO $ bracket
     if res == -1 || res == 0 then return Nothing else
         (do
           t <- T.peekCStringLen (p, fromIntegral res)
-          return (Just t)) `catch` (\(SomeException _) -> do
-            print ("failed to decode " <> show res)
-            raw <- peekArray (fromIntegral res) p
-            print (map castCCharToChar raw, show res) >> return Nothing)
+          return (Just t)) `catch` (\(SomeException _) -> return Nothing)
   )
 -- | Pause execution for a number of milliseconds.
 -- Wrapper around [@terminal_measure_ext@](http://foo.wyrd.name/en:bearlibterminal:reference#delay)
@@ -391,11 +386,22 @@ terminalDelay ::
   -> m ()
 terminalDelay = liftIO . c_terminal_delay . fromIntegral
 
+-- | Read an event from the input queue and remove it. If there are no pending events in the input queue, block
+-- until there is. If you don't want to block until an event comes, check for input with `terminalHasInput` first.
+-- Wrapper around [@terminal_read@](http://foo.wyrd.name/en:bearlibterminal:reference#read).
+-- For more information on the input queue, see the original documentation: http://foo.wyrd.name/en:bearlibterminal:reference:input#input_queue
 terminalRead :: MonadIO m => m Keycode
 terminalRead = Keycode <$> terminalReadCode
 
-terminalPeek :: MonadIO m => m Keycode
-terminalPeek = Keycode <$> terminalPeekCode
+-- | Read an event from the input queue but **do not** remove it. If there are no pending events in the input queue, this will return `Nothing`.
+-- This is non-blocking.
+-- Wrapper around [@terminal_peek@](http://foo.wyrd.name/en:bearlibterminal:reference#peek).
+-- For more information on the input queue, see the original documentation: http://foo.wyrd.name/en:bearlibterminal:reference:input#input_queue
+terminalPeek :: MonadIO m => m (Maybe Keycode)
+terminalPeek = (\x -> if x == 0 then Nothing else Just (Keycode x)) <$> terminalPeekCode
 
+-- | Get the current status of a key (e.g. pressed or released). This is a more specific version of `terminalState` for when the `Keycode` is
+-- a keyboard key. The behaviour will be strange if you use this for e.g. querying the mouse position. Use `terminalState` for that.
+-- Wrapper around [@terminal_state@](http://foo.wyrd.name/en:bearlibterminal:reference:input#state).
 terminalKeyState :: MonadIO m => Keycode -> m Bool
 terminalKeyState = fmap (== 1) . terminalState . coerce
