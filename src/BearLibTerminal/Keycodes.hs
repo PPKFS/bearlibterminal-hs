@@ -251,35 +251,35 @@ pattern TkKpPlus= Keycode 0x57
 pattern TkKpEnter :: Keycode
 pattern TkKpEnter= Keycode 0x58
 
-pattern TkKp_1 :: Keycode
-pattern TkKp_1= Keycode 0x59
+pattern TkKp1 :: Keycode
+pattern TkKp1= Keycode 0x59
 
-pattern TkKp_2 :: Keycode
-pattern TkKp_2= Keycode 0x5A
+pattern TkKp2 :: Keycode
+pattern TkKp2= Keycode 0x5A
 
-pattern TkKp_3 :: Keycode
-pattern TkKp_3= Keycode 0x5B
+pattern TkKp3 :: Keycode
+pattern TkKp3= Keycode 0x5B
 
-pattern TkKp_4 :: Keycode
-pattern TkKp_4= Keycode 0x5C
+pattern TkKp4 :: Keycode
+pattern TkKp4= Keycode 0x5C
 
-pattern TkKp_5 :: Keycode
-pattern TkKp_5= Keycode 0x5D
+pattern TkKp5 :: Keycode
+pattern TkKp5= Keycode 0x5D
 
-pattern TkKp_6 :: Keycode
-pattern TkKp_6= Keycode 0x5E
+pattern TkKp6 :: Keycode
+pattern TkKp6= Keycode 0x5E
 
-pattern TkKp_7 :: Keycode
-pattern TkKp_7= Keycode 0x5F
+pattern TkKp7 :: Keycode
+pattern TkKp7= Keycode 0x5F
 
-pattern TkKp_8 :: Keycode
-pattern TkKp_8= Keycode 0x60
+pattern TkKp8 :: Keycode
+pattern TkKp8= Keycode 0x60
 
-pattern TkKp_9 :: Keycode
-pattern TkKp_9= Keycode 0x61
+pattern TkKp9 :: Keycode
+pattern TkKp9= Keycode 0x61
 
-pattern TkKp_0 :: Keycode
-pattern TkKp_0= Keycode 0x62
+pattern TkKp0 :: Keycode
+pattern TkKp0= Keycode 0x62
 
 pattern TkKpPeriod :: Keycode
 pattern TkKpPeriod= Keycode 0x63
@@ -333,16 +333,16 @@ pattern TkMouseClicks :: Keycode
 pattern TkMouseClicks= Keycode 0x8C
 
 {-
- * If key was released instead of pressed, it's code will be OR'ed with TkKEY_RELEASED:
+ * If key was released instead of pressed, it's code will be OR'ed with TkKEYRELEASED:
  * a) pressed 'A' :: 0x04
- * b) released 'A' :: 0x04|VK_KEY_RELEASED == Keycode 0x104
+ * b) released 'A' :: 0x04|VKKEYRELEASED == Keycode 0x104
 -}
 pattern TkKeyReleased :: Keycode
 pattern TkKeyReleased = Keycode 0x100
 
 {-
  * Virtual key-codes for internal terminal states/variables.
- * These can be accessed via terminal_state function.
+ * These can be accessed via terminalstate function.
 -}
 pattern TkWidth :: Keycode
 pattern TkWidth= Keycode 0xC0

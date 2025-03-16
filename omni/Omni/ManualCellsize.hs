@@ -1,9 +1,14 @@
 module Omni.ManualCellsize where
 
+import BearLibTerminal
+import BearLibTerminal.Keycodes
+import BearLibTerminal.Terminal.Print
+import BearLibTerminal.Terminal.String
+import Control.Monad (when)
+import Control.Monad.State
+import Data.Functor (void)
 import Formatting
 import qualified Data.Vector as V
-import BearLibTerminal
-import Control.Monad.State
 
 data GuiState = GuiState
   { hinting :: Int
@@ -24,72 +29,45 @@ manualCellsize = do
       setupCellsize = do
         s <- get
         terminalSet_ (sformat ("window: cellsize=" % int % "x" % int) (cellWidth s) (cellHeight s))
+      setupFont = do
+        s <- get
+        terminalSet_ $ sformat ("font: " % stext % ", size=" % int % ", hinting=" % stext) font (size s) (fontHintings V.! hinting s)
+      runLoop = do
+        s <- get
+        terminalClear
+        terminalColorName "white"
+        terminalPrint_ 2 1 "Hello, world!"
+        void $ terminalPrintString 2 3 $ "[color=orange]Font size:[/color] " <> show (size s)
+        terminalPrint_ 2 4 $ "[color=orange]Font hinting:[/color] " <> (fontHintings V.! hinting s)
+        terminalPrint_ 2 5 $ sformat ("[color=orange]Cell size:[/color] " % int % "x" % int) (cellWidth s) (cellHeight s)
+        terminalPrint_ 2 7 "[color=orange]TIP:[/color] Use arrow keys to change cell size"
+        terminalPrint_ 2 8 "[color=orange]TIP:[/color] Use Shift+Up/Down arrow keys to change font size"
+        terminalPrint_ 2 9 "[color=orange]TIP:[/color] Use TAB to switch font hinting mode"
 
-  terminalSet_ $ sformat ("font: " % stext % ", size=" % int % ", hinting=" % stext) font (size initialGui) (fontHintings V.! (hinting initialGui))
-  flip (evalStateT setupCellsize
-	{-
-  auto setup_cellsize = [&](){terminal_setf("window: cellsize=%dx%d", cell_width, cell_height);};
+        terminalRefresh
+        k <- terminalRead
+        case k of
+          _
+            | k == TkClose || k == TkEscape -> return ()
+          TkLeft
+            | cellWidth s > 4 -> ifShift (return ()) (modify (\s' -> s' { cellWidth = cellWidth s - 1}) >> setupCellsize)
+          TkRight
+            | cellWidth s < 24 -> ifShift (return ()) (modify (\s' -> s' { cellWidth = cellWidth s + 1}) >> setupCellsize)
+          TkDown -> ifShift
+                      (when (size s > 4) $ modify (\s' -> s' { size = size s - 1}) >> setupFont )
+                      (when (cellHeight s < 24) $ modify (\s' -> s' { cellHeight = cellHeight s + 1}) >> setupCellsize)
+          TkUp -> ifShift
+                      (when (size s < 64) $ modify (\s' -> s' { size = size s + 1}) >> setupFont  )
+                      (when (cellHeight s > 4) $ modify (\s' -> s' { cellHeight = cellHeight s - 1}) >> setupCellsize)
+          TkTab -> modify (\s' -> s' { hinting = (hinting s + 1) `mod` V.length fontHintings}) >> setupFont >> runLoop
+          _ -> runLoop
+      ifShift yes no = do
+        shiftPressed <- terminalKeyState TkShift
+        if shiftPressed then yes else no
+        runLoop
 
-	setup_cellsize();
-	setup_font();
-
-	while (true)
-	{
-		terminal_clear();
-		terminal_color("white");
-
-		terminal_printf(2, 1, "Hello, world!");
-		terminal_printf(2, 3, "[color=orange]Font size:[/color] %d", font_size);
-		terminal_printf(2, 4, "[color=orange]Font hinting:[/color] %s", font_hintings[font_hinting].c_str());
-		terminal_printf(2, 5, "[color=orange]Cell size:[/color] %dx%d", cell_width, cell_height);
-		terminal_printf(2, 7, "[color=orange]TIP:[/color] Use arrow keys to change cell size");
-		terminal_printf(2, 8, "[color=orange]TIP:[/color] Use Shift+Up/Down arrow keys to change font size");
-		terminal_printf(2, 9, "[color=orange]TIP:[/color] Use TAB to switch font hinting mode");
-
-		terminal_refresh();
-
-		int key = terminal_read();
-
-		if (key == TK_CLOSE || key == TK_ESCAPE)
-		{
-			break;
-		}
-		else if (key == TK_LEFT && !terminal_state(TK_SHIFT) && cell_width > 4)
-		{
-			cell_width -= 1;
-			setup_cellsize();
-		}
-		else if (key == TK_RIGHT && !terminal_state(TK_SHIFT) && cell_width < 24)
-		{
-			cell_width += 1;
-			setup_cellsize();
-		}
-		else if (key == TK_DOWN && !terminal_state(TK_SHIFT) && cell_height < 24)
-		{
-			cell_height += 1;
-			setup_cellsize();
-		}
-		else if (key == TK_UP && !terminal_state(TK_SHIFT) && cell_height > 4)
-		{
-			cell_height -= 1;
-			setup_cellsize();
-		}
-		else if (key == TK_UP && terminal_state(TK_SHIFT) && font_size < 64)
-		{
-			font_size += 1;
-			setup_font();
-		}
-		else if (key == TK_DOWN && terminal_state(TK_SHIFT) && font_size > 4)
-		{
-			font_size -= 1;
-			setup_font();
-		}
-		else if (key == TK_TAB)
-		{
-			font_hinting = (font_hinting + 1) % font_hintings.size();
-			setup_font();
-		}
-	}
-
-	terminal_set("font: default; window.cellsize=auto");
-  -}
+  flip evalStateT initialGui $ do
+    setupCellsize
+    setupFont
+    runLoop
+  terminalSet_ "font: default; window.cellsize=auto"

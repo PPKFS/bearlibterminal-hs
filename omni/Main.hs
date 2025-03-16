@@ -12,6 +12,7 @@ import qualified Data.Map as M
 import Omni.DefaultFont (defaultFont)
 import BearLibTerminal.Keycodes
 import Omni.Tilesets
+import Omni.ManualCellsize
 
 main :: IO ()
 main = do

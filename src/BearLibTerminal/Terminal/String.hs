@@ -2,6 +2,8 @@ module BearLibTerminal.Terminal.String
   ( terminalSetString
   , terminalSetString_
   , terminalColorNameString
+  , terminalPrintString
+  , terminalPrintExtString
 
   ) where
 

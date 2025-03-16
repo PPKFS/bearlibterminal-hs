@@ -77,3 +77,4 @@ executable omni
     Omni.DefaultFont
     Omni.Tilesets
     Omni.Sprites
+    Omni.ManualCellsize

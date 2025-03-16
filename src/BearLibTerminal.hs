@@ -84,6 +84,7 @@ module BearLibTerminal
   -- ** Picking
   , terminalPick
   , terminalPickColor
+  , terminalKeyState
 
   -- * Utility
   , terminalDelay
@@ -91,7 +92,6 @@ module BearLibTerminal
 
 import BearLibTerminal.Raw
 import GHC.Generics
-import Data.Function ((&))
 import Control.Monad.IO.Class
 
 import Foreign.C.String
@@ -106,6 +106,7 @@ import BearLibTerminal.Terminal.Color
 import BearLibTerminal.Terminal.Print
 import Data.Char (ord)
 import BearLibTerminal.Keycodes
+import Data.Coerce (coerce)
 
 maxStringReadSizeInBytes :: Int
 maxStringReadSizeInBytes = 8192
@@ -395,3 +396,6 @@ terminalRead = Keycode <$> terminalReadCode
 
 terminalPeek :: MonadIO m => m Keycode
 terminalPeek = Keycode <$> terminalPeekCode
+
+terminalKeyState :: MonadIO m => Keycode -> m Bool
+terminalKeyState = fmap (== 1) . terminalState . coerce
