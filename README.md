@@ -1,6 +1,8 @@
 ![Hackage Version](https://img.shields.io/hackage/v/bearlibterminal)
 
-# bearlibterminal-hs
+# bearlibterminal-hs -
+
+Also available on [Hackage](https://hackage.haskell.org/package/bearlibterminal).
 
 Low-level Haskell bindings to the [BearLibTerminal](http://foo.wyrd.name/en:bearlibterminal) graphics library, primarily for roguelike games.
 
