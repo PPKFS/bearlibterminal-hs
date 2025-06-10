@@ -1,81 +1,164 @@
 cabal-version: 3.6
 name:          bearlibterminal
 version:       0.1.0.1
-synopsis:      Low-level Haskell bindings to the BearLibTerminal graphics library.
-description:
-  A Haskell wrapper for a graphics library for making roguelike-style games, with a terminal-like window facilitating flexible textual output and
-  uncomplicated input processing. For more information and a design overview, please see the original documentation here: http://foo.wyrd.name/en:bearlibterminal.
-
+license:       MIT
+copyright:     2024-2025 Avery
+maintainer:    Avery <ppkfs@outlook.com>
+author:        Avery
+tested-with:   ghc ==9.8.2
 homepage:      https://github.com/PPKFS/bearlibterminal-hs
 bug-reports:   https://github.com/PPKFS/bearlibterminal-hs/issues
-license:       MIT
-author:        Avery
-maintainer:    Avery <ppkfs@outlook.com>
-copyright:     2024-2025 Avery
+synopsis:
+    Low-level Haskell bindings to the BearLibTerminal graphics library.
+
+description:
+    A Haskell wrapper for a graphics library for making roguelike-style games, with a terminal-like window facilitating flexible textual output and
+    uncomplicated input processing. For more information and a design overview, please see the original documentation here: http://foo.wyrd.name/en:bearlibterminal.
+
 category:      Game Development
 build-type:    Simple
-tested-with:   GHC == 9.8.2
 
 source-repository head
-  type:     git
-  location: https://github.com/PPKFS/bearlibterminal-hs.git
-
-common common-options
-  build-depends:
-      base >= 4.17.2 && < 5
-    , text >= 2.1.1 && < 3
-    , bytestring >= 0.12.1 && < 2
-    , mtl >= 2.3.1 && < 3
-
-  ghc-options:
-    -Wall -Wcompat -Widentities -Wredundant-constraints
-    -Wno-unused-packages -Wno-deprecations -fhide-source-paths
-    -Wno-unused-top-binds -Wmissing-deriving-strategies -haddock
-
-  default-language: GHC2021
-  default-extensions:
-    DerivingStrategies
-    OverloadedStrings
-    MultiWayIf
-    BlockArguments
-    LambdaCase
+    type:     git
+    location: https://github.com/PPKFS/bearlibterminal-hs.git
 
 library
-  import: common-options
-  hs-source-dirs:  src
-  exposed-modules:
-    BearLibTerminal
-    BearLibTerminal.Raw
-    BearLibTerminal.Keycodes
-    BearLibTerminal.Terminal.CString
-    BearLibTerminal.Terminal.Color
-    BearLibTerminal.Terminal.Print
-    BearLibTerminal.Terminal.Set
-    BearLibTerminal.Terminal.String
-  extra-libraries: stdc++ BearLibTerminal
-  include-dirs:
-    cbits
-  includes:
-    cbits/BearLibTerminal.h
-    cbits/BearLibTerminalExtras.h
-  install-includes:
-    cbits/BearLibTerminal.h
-    cbits/BearLibTerminalExtras.h
+    exposed-modules:
+        BearLibTerminal
+        BearLibTerminal.Raw
+        BearLibTerminal.Keycodes
+        BearLibTerminal.Terminal.CString
+        BearLibTerminal.Terminal.Color
+        BearLibTerminal.Terminal.Print
+        BearLibTerminal.Terminal.Set
+        BearLibTerminal.Terminal.String
+    cxx-options: -O3 -DNDEBUG -std=gnu++14 -fPIC -Wno-deprecated-declarations -DBearLibTerminal_EXPORTS -DTERMINAL_VERSION="Unknown" -arch arm64 -DNDEBUG
+    extra-libraries: freetype
+    extra-lib-dirs: /opt/homebrew/lib
+    extra-framework-dirs:
+      /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks
+    frameworks: AppKit
+    cxx-sources:
+        bearlibterminal/Terminal/Source/Atlas.cpp
+
+        bearlibterminal/Terminal/Source/BOM.cpp
+
+        bearlibterminal/Terminal/Source/Base64.cpp
+
+        bearlibterminal/Terminal/Source/BearLibTerminal.cpp
+        bearlibterminal/Terminal/Source/Bitmap.cpp
+
+        bearlibterminal/Terminal/Source/BitmapTileset.cpp
+        bearlibterminal/Terminal/Source/CocoaWindow.mm
+
+        bearlibterminal/Terminal/Source/Config.cpp
+
+        bearlibterminal/Terminal/Source/DynamicTileset.cpp
+
+        bearlibterminal/Terminal/Source/Encoding.cpp
+
+
+        bearlibterminal/Terminal/Source/Keystroke.cpp
+
+        bearlibterminal/Terminal/Source/LoadBMP.cpp
+        bearlibterminal/Terminal/Source/LoadBitmap.cpp
+
+        bearlibterminal/Terminal/Source/LoadJPEG.cpp
+        bearlibterminal/Terminal/Source/LoadPNG.cpp
+        bearlibterminal/Terminal/Source/Log.cpp
+
+        bearlibterminal/Terminal/Source/Luaopen.cpp
+        bearlibterminal/Terminal/Source/OpenGL.cpp
+
+        bearlibterminal/Terminal/Source/OptionGroup.cpp
+
+        bearlibterminal/Terminal/Source/Options.cpp
+
+        bearlibterminal/Terminal/Source/Palette.cpp
+
+        bearlibterminal/Terminal/Source/Platform.cpp
+
+
+
+        bearlibterminal/Terminal/Source/Resource.cpp
+
+        bearlibterminal/Terminal/Source/SaveBMP.cpp
+
+        bearlibterminal/Terminal/Source/Stage.cpp
+
+        bearlibterminal/Terminal/Source/Terminal.cpp
+
+        bearlibterminal/Terminal/Source/Texture.cpp
+
+        bearlibterminal/Terminal/Source/Tileset.cpp
+
+        bearlibterminal/Terminal/Source/TrueTypeTileset.cpp
+
+        bearlibterminal/Terminal/Source/Utility.cpp
+
+        bearlibterminal/Terminal/Source/WinApiWindow.cpp
+
+        bearlibterminal/Terminal/Source/Window.cpp
+
+        bearlibterminal/Terminal/Source/X11Window.cpp
+        bearlibterminal/Terminal/Dependencies/PicoPNG/Source/PicoPNG.cpp
+        bearlibterminal/Terminal/Dependencies/PicoPNG/Source/PicoPNG.cpp
+
+
+    hs-source-dirs:     src
+    default-language:   GHC2021
+    default-extensions:
+        DerivingStrategies OverloadedStrings MultiWayIf BlockArguments
+        LambdaCase
+
+    include-dirs:
+      cbits
+      bearlibterminal/Terminal/Source
+      bearlibterminal/Terminal/./Include/C
+      bearlibterminal/Terminal/./Dependencies/FreeType/Include
+      bearlibterminal/Terminal/./Dependencies/PicoPNG/Include
+      bearlibterminal/Terminal/./Dependencies/NanoJPEG/Include
+    includes:           cbits/BearLibTerminal.h cbits/BearLibTerminalExtras.h
+    install-includes:   cbits/BearLibTerminal.h cbits/BearLibTerminalExtras.h
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wredundant-constraints
+        -Wno-unused-packages -Wno-deprecations -fhide-source-paths
+        -Wno-unused-top-binds -Wmissing-deriving-strategies -haddock -g
+
+    build-depends:
+        base >=4.17.2 && <5,
+        text >=2.1.1 && <3,
+        bytestring >=0.12.1 && <2,
+        mtl >=2.3.1 && <3
 
 executable omni
-  import: common-options
-  build-depends:
-    bearlibterminal >= 0.1.0.0 && <= 0.2.0.0,
-    containers >= 0.6.8 && < 1,
-    formatting >= 7.2.0 && < 8,
-    time >= 1.12.2 && < 2,
-    random >= 1.3.0 && < 2,
-    vector >= 0.13.2 && < 1,
-    word8 >= 0.1.3 && < 1,
-  hs-source-dirs:  omni
-  main-is: Main.hs
-  other-modules:
-    Omni.BasicOutput
-    Omni.DefaultFont
-    Omni.Tilesets
-    Omni.ManualCellsize
+    main-is:            Main.hs
+    hs-source-dirs:     omni
+    other-modules:
+        Omni.BasicOutput
+        Omni.DefaultFont
+        Omni.Tilesets
+        Omni.ManualCellsize
+
+    default-language:   GHC2021
+    default-extensions:
+        DerivingStrategies OverloadedStrings MultiWayIf BlockArguments
+        LambdaCase
+
+    ghc-options:
+        -Wall -Wcompat -Widentities -Wredundant-constraints
+        -Wno-unused-packages -Wno-deprecations -fhide-source-paths
+        -Wno-unused-top-binds -Wmissing-deriving-strategies -haddock -g
+
+    build-depends:
+        base >=4.17.2 && <5,
+        text >=2.1.1 && <3,
+        bytestring >=0.12.1 && <2,
+        mtl >=2.3.1 && <3,
+        bearlibterminal >=0.1.0.0 && <=0.2.0.0,
+        containers >=0.6.8 && <1,
+        formatting >=7.2.0 && <8,
+        time >=1.12.2 && <2,
+        random >=1.3.0 && <2,
+        vector >=0.13.2 && <1,
+        word8 >=0.1.3 && <1
