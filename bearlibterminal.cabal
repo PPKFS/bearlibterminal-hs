@@ -121,7 +121,10 @@ library
       bearlibterminal/Terminal/./Dependencies/PicoPNG/Include
       bearlibterminal/Terminal/./Dependencies/NanoJPEG/Include
     includes:           cbits/BearLibTerminal.h cbits/BearLibTerminalExtras.h
-    install-includes:   cbits/BearLibTerminal.h cbits/BearLibTerminalExtras.h
+    install-includes:
+        cbits/BearLibTerminal.h
+        cbits/BearLibTerminalExtras.h
+        bearlibterminal/Terminal/Source/*.hpp
     ghc-options:
         -Wall -Wcompat -Widentities -Wredundant-constraints
         -Wno-unused-packages -Wno-deprecations -fhide-source-paths
