@@ -120,7 +120,9 @@ library
       bearlibterminal/Terminal/./Dependencies/FreeType/Include
       bearlibterminal/Terminal/./Dependencies/PicoPNG/Include
       bearlibterminal/Terminal/./Dependencies/NanoJPEG/Include
-    includes:           cbits/BearLibTerminal.h cbits/BearLibTerminalExtras.h
+    includes:
+        cbits/BearLibTerminal.h
+        cbits/BearLibTerminalExtras.h
     install-includes:
         cbits/BearLibTerminal.h
         cbits/BearLibTerminalExtras.h
