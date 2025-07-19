@@ -126,7 +126,7 @@ library
     install-includes:
         cbits/BearLibTerminal.h
         cbits/BearLibTerminalExtras.h
-        bearlibterminal/Terminal/Source/*.hpp
+        bearlibterminal/Terminal/Source/Atlas.hpp
     ghc-options:
         -Wall -Wcompat -Widentities -Wredundant-constraints
         -Wno-unused-packages -Wno-deprecations -fhide-source-paths
