@@ -126,6 +126,39 @@ library
     install-includes:
         cbits/BearLibTerminal.h
         cbits/BearLibTerminalExtras.h
+        bearlibterminal/Terminal/Source/Base64.hpp
+        bearlibterminal/Terminal/Source/Bitmap.hpp
+        bearlibterminal/Terminal/Source/BitmapTileset.hpp
+        bearlibterminal/Terminal/Source/BOM.hpp
+        bearlibterminal/Terminal/Source/Builtin.Codepages.hpp
+        bearlibterminal/Terminal/Source/Builtin.DefaultFont.hpp
+        bearlibterminal/Terminal/Source/CocoaWindow.h
+        bearlibterminal/Terminal/Source/Color.hpp
+        bearlibterminal/Terminal/Source/Config.hpp
+        bearlibterminal/Terminal/Source/DynamicTileset.hpp
+        bearlibterminal/Terminal/Source/Encoding.hpp
+        bearlibterminal/Terminal/Source/Geometry.hpp
+        bearlibterminal/Terminal/Source/Keystroke.hpp
+        bearlibterminal/Terminal/Source/LoadBitmap.hpp
+        bearlibterminal/Terminal/Source/Log.hpp
+        bearlibterminal/Terminal/Source/OpenGL.hpp
+        bearlibterminal/Terminal/Source/OptionGroup.hpp
+        bearlibterminal/Terminal/Source/Options.hpp
+        bearlibterminal/Terminal/Source/Palette.hpp
+        bearlibterminal/Terminal/Source/Platform.hpp
+        bearlibterminal/Terminal/Source/Point.hpp
+        bearlibterminal/Terminal/Source/Rectangle.hpp
+        bearlibterminal/Terminal/Source/Resource.hpp
+        bearlibterminal/Terminal/Source/Size.hpp
+        bearlibterminal/Terminal/Source/Stage.hpp
+        bearlibterminal/Terminal/Source/Terminal.hpp
+        bearlibterminal/Terminal/Source/Texture.hpp
+        bearlibterminal/Terminal/Source/Tileset.hpp
+        bearlibterminal/Terminal/Source/TrueTypeTileset.hpp
+        bearlibterminal/Terminal/Source/Utility.hpp
+        bearlibterminal/Terminal/Source/WinApiWindow.hpp
+        bearlibterminal/Terminal/Source/Window.hpp
+        bearlibterminal/Terminal/Source/X11Window.hpp
         bearlibterminal/Terminal/Source/Atlas.hpp
     ghc-options:
         -Wall -Wcompat -Widentities -Wredundant-constraints
