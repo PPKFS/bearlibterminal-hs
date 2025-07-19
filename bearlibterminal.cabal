@@ -160,6 +160,8 @@ library
         bearlibterminal/Terminal/Source/Window.hpp
         bearlibterminal/Terminal/Source/X11Window.hpp
         bearlibterminal/Terminal/Source/Atlas.hpp
+        bearlibterminal/Terminal/Dependencies/NanoJPEG/Include/NanoJPEG.h
+        bearlibterminal/Terminal/Dependencies/PicoPNG/Include/PicoPNG.h
     ghc-options:
         -Wall -Wcompat -Widentities -Wredundant-constraints
         -Wno-unused-packages -Wno-deprecations -fhide-source-paths
