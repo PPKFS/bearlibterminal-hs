@@ -1,0 +1,5 @@
+packages:
+  *.cabal
+
+extra-include-dirs:
+  ${PKGROOT}/bearlibterminal/Terminal/Source

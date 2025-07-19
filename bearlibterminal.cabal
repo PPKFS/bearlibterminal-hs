@@ -36,8 +36,10 @@ library
     extra-libraries: freetype
     extra-lib-dirs: /opt/homebrew/lib
     extra-framework-dirs:
-      /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks
+        /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks
     frameworks: AppKit
+    extra-source-files:
+      bearlibterminal/Terminal/Source/*.hpp
     cxx-sources:
         bearlibterminal/Terminal/Source/Atlas.cpp
 
