@@ -51,7 +51,6 @@ library
         bearlibterminal/Terminal/Source/Bitmap.cpp
 
         bearlibterminal/Terminal/Source/BitmapTileset.cpp
-        bearlibterminal/Terminal/Source/CocoaWindow.mm
 
         bearlibterminal/Terminal/Source/Config.cpp
 
