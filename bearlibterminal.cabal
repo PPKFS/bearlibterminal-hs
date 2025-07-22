@@ -32,7 +32,7 @@ library
         BearLibTerminal.Terminal.Print
         BearLibTerminal.Terminal.Set
         BearLibTerminal.Terminal.String
-    cxx-options: -O3 -DNDEBUG -std=gnu++14 -fPIC -Wno-deprecated-declarations -DBearLibTerminal_EXPORTS -DTERMINAL_VERSION="Unknown" -DNDEBUG
+    cxx-options: -O3 -DNDEBUG -std=c++17 -fPIC -Wno-deprecated-declarations -DBearLibTerminal_EXPORTS -DTERMINAL_VERSION="Unknown" -DNDEBUG
     extra-libraries: freetype
     extra-lib-dirs: /opt/homebrew/lib
     extra-framework-dirs:
